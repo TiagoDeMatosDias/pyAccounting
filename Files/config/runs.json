@@ -1,0 +1,27 @@
+{
+  "Runs": [
+    {
+      "output": "Files\\output\\output_0_parser_pd.csv",
+      "task": "parser",
+      "type": "IBKR",
+	  "runId":"0"
+    },
+	{
+      "output": "Files\\output\\output_1_merge.csv",
+	  "input_1": "Files\\output\\output_0_parser.csv",
+      "input_2": "Files\\input\\Adjustments.csv",
+      "task": "merge",
+	  "benchmark": "Assets:Transfers:IBKR",
+	  "benchmarkTicker": "VWCE",
+	  "runId":"1"
+    },
+	{
+      "output": "Files\\input\\output_2_benchmark.csv",
+	  "input": "Files\\output\\output_1_merge.csv",
+      "task": "benchmark",
+	  "benchmark": "Assets:Transfers:IBKR",
+	  "benchmarkTicker": "VWCE",
+	  "runId":"1"
+    }
+  ]
+}

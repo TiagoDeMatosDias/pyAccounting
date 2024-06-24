@@ -1,0 +1,20 @@
+{
+
+    "CSV_Separator": ";",
+    "Runs": "Files\\config\\runs.json",
+    "InputFolder": "Files\\input",
+    "OutputFolder": "Files\\output",
+    "RelativePaths": true,
+    "Parsers":
+    [
+      {
+        "Parser":  "n26",
+        "Config": ""
+      },
+      {
+        "Parser":  "IBKR",
+        "Config": ""
+      }
+    ]
+
+}
