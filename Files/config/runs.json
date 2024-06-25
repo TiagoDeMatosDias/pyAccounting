@@ -1,7 +1,7 @@
 {
   "Runs": [
     {
-      "output": "Files\\output\\output_0_parser_pd.csv",
+      "output": "Files\\output\\output_0_parser.csv",
       "task": "parser",
       "type": "IBKR",
 	  "runId":"0"

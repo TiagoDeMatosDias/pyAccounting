@@ -7,7 +7,6 @@ import typing
 
 import itertools
 
-from classes.Entry import Entry as entry
 from decimal import Decimal
 
 class Functions:
@@ -28,18 +27,7 @@ class Functions:
             return os.path.join(os.getcwd(), relativePath, filename)
     pass
 
-    def write_CSV(filename, list, separator, header=True, overwrite=True):
-        if overwrite:
-            type = "w"
-        else:
-            type = "a"
-        with open(filename, type) as f:
-            for entry in list:
-                if header:
-                    f.write(f"{entry.headers_CSV(separator)}\n")
-                    header = False
-                f.write(f"{entry.write_CSV(separator)}\n")
-    pass
+
 
     def convert_Decimal(value)-> Decimal:
         try:
@@ -48,22 +36,7 @@ class Functions:
             return Decimal(0.00)
         pass
 
-    def read_CSV(self,filename, separator, header=True):
-        entries = []
-        with open(filename, 'r') as f:
-            reader = csv.reader(f)
-            stringList = [row for row in reader]
-            if header:
-                stringList.pop(0)
-            for row in stringList:
-                fullline = ""
-                for line in row:
-                    fullline = fullline + line
-                parameters = fullline.split(separator)
-                e = entry(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], self.convert_Decimal(parameters[5]), parameters[6], self.convert_Decimal(parameters[7]), parameters[8])
-                entries.append(e)
-        return entries
-    pass
+
 
     def get_ListFilesInDir(folder):
         return [os.path.join(folder, f) for f in os.listdir(folder)]

@@ -1,6 +1,9 @@
+import pandas as pd
+
+
 def command_parser(run, config):
     if run["type"] == "IBKR":
-        from classes.parser_IBKR_pd import write_Entries
+        from classes.parser_IBKR import write_Entries
         outputFile = run["output"]
         write_Entries(outputFile, config)
         pass
@@ -15,14 +18,16 @@ def command_merge(run, config, functions):
     input_1 = run["input_1"]
     input_2 = run["input_2"]
     output = run["output"]
-    output = functions.get_full_Path(output)
     separator = config["CSV_Separator"]
-    entries = functions.read_CSV(functions,input_1,separator)
-    entries = entries + functions.read_CSV(functions,input_2,separator)
-    from classes.Entry import Entry
-    entries = sorted(entries, key=Entry.sort_priority)
-    functions.write_CSV(output, entries, separator)
-    print("hello")
+
+    import classes.pandas as pandas
+    entries_1 = pandas.read_file(input_1,separator )
+    entries_2 = pandas.read_file(input_2,separator )
+
+
+    entries = pd.concat( [entries_1, entries_2])
+    entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
+    pandas.write_file_entries(entries,output,separator)
     pass
 
 

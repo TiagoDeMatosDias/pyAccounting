@@ -1,16 +1,12 @@
 import pandas as pd
+from classes.functions import Functions as f
 
-def get_panda(filepath, separator):
-    entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator,parse_dates=["Date"])
+def read_file(filepath, separator):
+    entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator, parse_dates=["Date"], date_format="%Y-%m-%d")
     return entries
 
-def get_Prices(entries):
-    return entries[entries["Type"] == "PriceUpdate"]
-
-
-def write_panda(entries, output, separator):
-    outputfile = functions.get_full_Path(output)
-
-    entries.to_csv(outputfile, sep=separator)
+def write_file_entries(entries, output, separator):
+    outputfile = f.get_full_Path(output)
+    entries.to_csv(outputfile, sep=separator, index=False, mode="w", header=True,columns=["Date","Type","ID","Name","Account","Quantity","Quantity_Type","Cost","Cost_Type"])
     pass
 

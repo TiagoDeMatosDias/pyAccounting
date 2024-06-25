@@ -4,26 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="904aeea6-7922-474d-b6d5-7a2e3edff73b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/pythonProject.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Files/config/config.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Files/config/parser_IBKR.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Files/config/runs.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/Balance.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/Entry.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/Price.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/commands.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/functions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/pandas.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/parser_IBKR.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/parser_IBKR_pd.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    <list default="true" id="904aeea6-7922-474d-b6d5-7a2e3edff73b" name="Changes" comment="initial commit">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Files/config/runs.json" beforeDir="false" afterPath="$PROJECT_DIR$/Files/config/runs.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/Balance.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/Entry.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/Price.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/commands.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/pandas.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/pandas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/parser_IBKR.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/parser_IBKR.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/parser_IBKR_pd.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,35 +93,26 @@
       <option name="presentableId" value="Default" />
       <updated>1718473903069</updated>
     </task>
+    <task id="LOCAL-00001" summary="initial commit">
+      <option name="closed" value="true" />
+      <created>1719249541234</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1719249541234</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.csv" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="initial commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="initial commit" />
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/main.py</url>
-          <line>9</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/parser_IBKR.py</url>
-          <line>22</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/parser_IBKR.py</url>
-          <line>71</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/classes/commands.py</url>
-          <line>12</line>
-          <option name="timeStamp" value="22" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
