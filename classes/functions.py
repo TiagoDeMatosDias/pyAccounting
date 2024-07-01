@@ -1,6 +1,7 @@
 import json
 import os
 import csv
+import uuid
 import xml
 import xml.etree.ElementTree as ET
 import typing
@@ -67,3 +68,35 @@ class Functions:
         for key in set(list(dict1.keys()) + list(dict2.keys())):
             combined[key] = list(itertools.chain(dict1.get(key, []), dict2.get(key, [])))
         return combined
+
+    def get_priceUpdates(entries):
+        return entries.loc[(entries['Type'] <= "PriceUpdate")  ]
+
+    def get_price(priceUpdates, ticker, currency, depth, maxDepth, latest = None):
+        prices = priceUpdates.loc[ (priceUpdates['Quantity_Type'] == ticker) ]
+        if latest != None:
+            prices = prices.loc[prices['Date'] <= latest]
+        priceOptions = prices["Cost_Type"].unique()
+
+        price = None
+        depth = depth + 1
+
+        if ticker == currency:
+            return 1
+
+        for typer in priceOptions:
+            if typer == currency:
+                prices = prices.loc[prices['Cost_Type'] == currency].sort_values(by="Date", ascending=False)
+                return prices["Cost"].iloc[0]
+
+        if price == None:
+            if depth <= maxDepth:
+                for option in priceOptions:
+                    price = Functions.get_price(priceUpdates, option, currency, depth, maxDepth, latest)
+                    if price != None:
+                        price = Decimal( price ) * Decimal( Functions.get_price(priceUpdates, ticker, option, depth, maxDepth, latest) )
+                        return price
+        return 0
+
+    def generate_unique_uuid():
+       return str(uuid.uuid4())

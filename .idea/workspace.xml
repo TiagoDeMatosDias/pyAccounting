@@ -4,17 +4,34 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="904aeea6-7922-474d-b6d5-7a2e3edff73b" name="Changes" comment="initial commit">
+    <list default="true" id="904aeea6-7922-474d-b6d5-7a2e3edff73b" name="Changes" comment="IBKR parser done + using pandas">
+      <change afterPath="$PROJECT_DIR$/Files/config/parser_n26.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/config/private/rules_n26.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/config/private/runs_backup.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/Adjustments.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/IBKR/2020.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/IBKR/2021.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/IBKR/2022.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/IBKR/2023.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/IBKR/2024-YTD.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2017.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2018.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2019.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2020.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2021.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2022.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2023.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/input/n26/2024-YTD.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Files/output/output_0_parser.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Files/config/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/Files/config/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Files/config/parser_IBKR.json" beforeDir="false" afterPath="$PROJECT_DIR$/Files/config/parser_IBKR.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Files/config/runs.json" beforeDir="false" afterPath="$PROJECT_DIR$/Files/config/runs.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/Balance.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/Entry.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/Price.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/commands.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/pandas.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/pandas.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/classes/parser_IBKR.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/parser_IBKR.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/parser_IBKR_pd.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/parser_n26.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/parser_n26.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,12 +62,17 @@
     &quot;Python.main.executor&quot;: &quot;Debug&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/programming/Finance/pyFin/pythonProject/classes&quot;
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/programming/Finance/pyFin/pythonProject/Files/config&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\programming\Finance\pyFin\pythonProject\Files\config" />
       <recent name="C:\programming\Finance\pyFin\pythonProject\classes" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\programming\Finance\pyFin\pythonProject\Files\config\private" />
     </key>
   </component>
   <component name="RunManager">
@@ -101,7 +123,15 @@
       <option name="project" value="LOCAL" />
       <updated>1719249541234</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="IBKR parser done + using pandas">
+      <option name="closed" value="true" />
+      <created>1719338001005</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1719338001005</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -109,18 +139,10 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="initial commit" />
+    <MESSAGE value="IBKR parser done + using pandas" />
+    <option name="LAST_COMMIT_MESSAGE" value="IBKR parser done + using pandas" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <default-breakpoints>
-        <breakpoint type="python-exception">
-          <properties notifyOnTerminate="true" exception="BaseException">
-            <option name="notifyOnTerminate" value="true" />
-          </properties>
-        </breakpoint>
-      </default-breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="stat.__len__()" />

@@ -9,11 +9,11 @@
     [
       {
         "Parser":  "n26",
-        "Config": ""
+        "Config": "Files/config/parser_n26.json"
       },
       {
         "Parser":  "IBKR",
-        "Config": ""
+        "Config": "Files/config/parser_IBKR.json"
       }
     ]
 

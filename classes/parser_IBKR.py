@@ -46,18 +46,15 @@ def parse_transactions(object, parser_config):
     if object["tag"] == "Trade":
         if object['attrs']["assetCategory"] == "CASH":
             entries = functions.combine_lists(entries, get_CASH(object['attrs'], parser_config))
-            #entries = entries +  get_CASH(object['attrs'], parser_config)
             pass
         elif (object['attrs']["assetCategory"] == "OPT") or (object['attrs']["assetCategory"] == "STK"):
             entries = functions.combine_lists(entries, get_STK(object['attrs'], parser_config))
-            #entries = entries +   get_STK(object['attrs'], parser_config)
 
             pass
 
     if object["tag"] == "Transfer":
             entries = functions.combine_lists(entries, get_Transfer(object['attrs'], parser_config))
 
-            #entries = entries +   get_Transfer(object['attrs'], parser_config)
 
     if object["tag"] == "CorporateAction":
             entries = functions.combine_lists(entries, get_CorporateAction(object['attrs'], parser_config))
@@ -116,9 +113,9 @@ def get_STK(object ,parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append( "Assets" + account_separator + account_subAccount  + account_separator + object['accountId']  + account_separator + "Equity"   + account_separator + object['symbol'])
+    Account.append( "Assets" + account_separator + account_subAccount  + account_separator + object['accountId']  + account_separator + "Equity" )
     Quantity.append(object['quantity'])
     Quantity_Type.append(object['symbol'])
     Cost.append(object['cost'])
@@ -128,7 +125,7 @@ def get_STK(object ,parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append("Assets" + account_separator + account_subAccount  + account_separator + object['accountId']  + account_separator + "Cash")
     Quantity.append( object['netCash'])
@@ -140,9 +137,9 @@ def get_STK(object ,parser_config):
     # entry 3
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append( "Expenses" + account_separator + account_subAccount  + account_separator + "Fees"   + account_separator + object['symbol'])
+    Account.append( "Expenses" + account_separator + account_subAccount  + account_separator + "Fees"   + account_separator + "Trading")
     Quantity.append( Decimal( object['ibCommission']).copy_negate())
     Quantity_Type.append( object['ibCommissionCurrency'])
     Cost.append( None)
@@ -152,9 +149,9 @@ def get_STK(object ,parser_config):
     # entry 4
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append( "Expenses" + account_separator + "Taxes"  + account_separator + account_subAccount   + account_separator + object['symbol'])
+    Account.append( "Expenses" + account_separator + "Taxes"  + account_separator + account_subAccount    + account_separator + "Trading")
     Quantity.append(Decimal( object['taxes']).copy_negate())
     Quantity_Type.append( object['currency'])
     Cost.append( None)
@@ -163,9 +160,9 @@ def get_STK(object ,parser_config):
     # entry 5
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
-    Name.append( object['description'])
-    Account.append( "Income" + account_separator + account_subAccount + account_separator + "PnL"  + account_separator + object['symbol'])
+    ID.append( "IBKR_" + object['transactionID'])
+    Name.append( object['symbol'] + " - " + object['description'])
+    Account.append( "Income" + account_separator + account_subAccount + account_separator + "PnL"  )
     Quantity.append( Decimal( object['fifoPnlRealized']).copy_negate() + Decimal(object['ibCommission']))
     Quantity_Type.append(  object['currency'])
     Cost.append(  None)
@@ -177,7 +174,7 @@ def get_STK(object ,parser_config):
 
     Date.append( object['reportDate'])
     Type.append( "PriceUpdate")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append("")
     Quantity.append(None)
@@ -225,7 +222,7 @@ def get_CASH(object ,parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append("Assets" + account_separator + account_subAccount  + account_separator + object['accountId']  + account_separator + "Cash")
     Quantity.append(object['proceeds'])
@@ -238,7 +235,7 @@ def get_CASH(object ,parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append( "Assets" + account_separator + account_subAccount  + account_separator + object['accountId']  + account_separator + "Cash")
     Quantity.append( object['quantity'])
@@ -250,7 +247,7 @@ def get_CASH(object ,parser_config):
     # entry 3
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append( "Assets" + account_separator + account_subAccount  + account_separator + object['accountId']  + account_separator + "Cash")
     Quantity.append( object['ibCommission'])
@@ -262,9 +259,9 @@ def get_CASH(object ,parser_config):
     # entry 4
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append( "Expenses" + account_separator + account_subAccount  + account_separator + "Fees"   + account_separator + object['symbol'])
+    Account.append( "Expenses" + account_separator + account_subAccount  + account_separator + "Fees"   + account_separator + "Cash")
     Quantity.append( Decimal( object['ibCommission']).copy_negate())
     Quantity_Type.append( object['ibCommissionCurrency'])
     Cost.append(  None)
@@ -273,9 +270,9 @@ def get_CASH(object ,parser_config):
     # entry 5
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append( "Expenses" + account_separator + "Taxes"  + account_separator + account_subAccount   + account_separator + object['symbol'])
+    Account.append( "Expenses" + account_separator + "Taxes"  + account_separator + account_subAccount    + account_separator + "Cash")
     Quantity.append( Decimal( object['taxes']))
     Quantity_Type.append( object['currency'])
     Cost.append( None)
@@ -287,7 +284,7 @@ def get_CASH(object ,parser_config):
 
     Date.append( object['reportDate'])
     Type.append( "PriceUpdate")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append("")
     Quantity.append(None)
@@ -301,7 +298,7 @@ def get_CASH(object ,parser_config):
 
     Date.append( object['reportDate'])
     Type.append( "PriceUpdate")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append("")
     Quantity.append(None)
@@ -347,9 +344,9 @@ def get_Transfer(object, parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append( "Assets" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + "Equity" + account_separator + object['symbol'])
+    Account.append( "Assets" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator  + "Equity" )
     Quantity.append( object['quantity'])
     Quantity_Type.append( object['symbol'])
     Cost.append(object['positionAmount'])
@@ -358,7 +355,7 @@ def get_Transfer(object, parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append(  "Assets" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + object['type'])
     Quantity.append(  Decimal(object['quantity']).copy_negate())
@@ -403,9 +400,9 @@ def get_CorporateAction(object, parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append( "Assets" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + "Equity" + account_separator + object['symbol'])
+    Account.append( "Assets" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + "Equity" )
     Quantity.append( object['quantity'])
     Quantity_Type.append( object['symbol'])
     Cost.append( None)
@@ -414,9 +411,9 @@ def get_CorporateAction(object, parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append(  "Income" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + "CorporateActions"+ account_separator + object['symbol'])
+    Account.append(  "Income" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + "CorporateActions")
     Quantity.append(  Decimal(object['quantity']).copy_negate())
     Quantity_Type.append(  object['symbol'])
     Cost.append(  None)
@@ -455,7 +452,7 @@ def get_Deposits(object, parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append( "Assets" + account_separator + account_subAccount + account_separator + object[ 'accountId'] + account_separator + "Cash")
     Quantity.append( object['amount'])
@@ -466,7 +463,7 @@ def get_Deposits(object, parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append(  "Assets" + account_separator + "Transfers" + account_separator + "IBKR")
     Quantity.append(  Decimal(object['amount']).copy_negate())
@@ -508,7 +505,7 @@ def get_WithholdingTax(object, parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append( "Assets" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + "Cash")
     Quantity.append( object['amount'])
@@ -519,9 +516,9 @@ def get_WithholdingTax(object, parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
-    Name.append( object['description'])
-    Account.append( "Expenses" + account_separator + "Taxes" + account_separator + account_subAccount + account_separator + "Dividend_Withholding"+ account_separator + object['symbol'])
+    ID.append( "IBKR_" + object['transactionID'])
+    Name.append( object['symbol'] + " - " + object['description'])
+    Account.append( "Expenses" + account_separator + "Taxes" + account_separator + account_subAccount + account_separator + "Dividend_Withholding")
     Quantity.append( Decimal(object['amount']).copy_negate())
     Quantity_Type.append( object['currency'])
     Cost.append( None)
@@ -560,7 +557,7 @@ def get_Dividends(object, parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append(  "Assets" + account_separator + account_subAccount + account_separator + object[ 'accountId'] + account_separator + "Cash")
     Quantity.append(  object['amount'])
@@ -571,7 +568,7 @@ def get_Dividends(object, parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append(  "Income" + account_separator + account_subAccount + account_separator + "Dividends"+ account_separator + object['symbol'])
     Quantity.append(  Decimal(object['amount']).copy_negate())
@@ -614,7 +611,7 @@ def get_Fees(object, parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append( "Assets" + account_separator + account_subAccount + account_separator + object[
         'accountId'] + account_separator + "Cash")
@@ -626,9 +623,9 @@ def get_Fees(object, parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append(  "Expenses" + account_separator + account_subAccount + account_separator + "Fees"+ account_separator + object['symbol'])
+    Account.append(  "Expenses" + account_separator + account_subAccount + account_separator + "Fees" + account_separator + "Other")
     Quantity.append(  Decimal(object['amount']).copy_negate())
     Quantity_Type.append(  object['currency'])
     Cost.append(  None)
@@ -670,7 +667,7 @@ def get_Interest(object, parser_config):
     # entry 1
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append(  "Assets" + account_separator + account_subAccount + account_separator + object[
         'accountId'] + account_separator + "Cash")
@@ -682,7 +679,7 @@ def get_Interest(object, parser_config):
     # entry 2
     Date.append( object['reportDate'])
     Type.append( "Transaction")
-    ID.append( object['transactionID'])
+    ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
     Account.append(  "Expenses" + account_separator + account_subAccount + account_separator + "Interest")
     Quantity.append(  Decimal(object['amount']).copy_negate())
