@@ -1,0 +1,9 @@
+# created by virtualenv automatically
+.idea
+.venv
+Files/input/*
+Files/config/private/*
+Files/output/*
+Files\input\*
+Files\config\private\*
+Files\output\*
