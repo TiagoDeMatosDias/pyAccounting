@@ -7,3 +7,8 @@ Files/output/*
 Files\input\*
 Files\config\private\*
 Files\output\*
+\classes\__pycache__\*
+/classes/__pycache__/*
+build
+dist
+log.txt

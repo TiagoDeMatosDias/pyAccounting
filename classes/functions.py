@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import csv
@@ -100,3 +101,10 @@ class Functions:
 
     def generate_unique_uuid():
        return str(uuid.uuid4())
+
+    def log(logData):
+        with open("log.txt", "a") as myfile:
+            time = str(datetime.datetime.now())
+            log = time + ": " + str(logData)
+            myfile.write(log)
+        print( log)
