@@ -127,7 +127,9 @@ def command_runningTotal(run, config):
 
 
     entries = pandas.read_file(input,separator )
+    PriceChanges = f.get_priceUpdates(entries)
     entries = f.get_transactions(entries)
+
 
     if startDate == None:
         startDate = entries["Date"].min()
@@ -153,10 +155,15 @@ def command_runningTotal(run, config):
     result = result.fillna(0)
     result = pandas.get_cumulativesum(result)
 
-    prices = f.get_priceUpdates(entries)
+
+
+
     if fairValueCurrency != None:
-        result["Price"] = result.apply(lambda x: f.get_LatestPrice(prices, x["Date"], x["Quantity_Type"], fairValueCurrency, 0,5  ), axis=1)
-        result["RunningTotal_FairValue"] = result.apply(lambda x: x["Price"] * x["RunningTotal"], axis=1)
+        UniquePriceCombo = pandas.get_crossJoinedFrames(pandas.get_dateFrame(startDate, endDate, increment), pandas.get_uniqueFrame(result, "Quantity_Type"))
+        UniquePriceCombo["Price"] = UniquePriceCombo.apply( lambda x: f.get_LatestPrice(PriceChanges, x["Date"], x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
+        result = result.merge(UniquePriceCombo, on=["Date", "Quantity_Type"], how="inner")
+        result["RunningTotal_FairValue"] = result.apply( lambda x: x["RunningTotal"] * x["Price"], axis=1)
+
         outputList = result[
             ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "RunningTotal_FairValue"]].rename(
             columns={
