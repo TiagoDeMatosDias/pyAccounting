@@ -24,6 +24,12 @@ def get_runningTotal(entries, date, Account, Quantity_Type, sumColumn):
     else:
         return filtered[sumColumn].sum()
 
+def get_cumulativesum(entries):
+    entries["RunningTotal"] = entries.groupby(by=["Account","Quantity_Type"])["Quantity"].cumsum(skipna=True)
+    return entries
+
+
+
 def get_crossJoinedFrames(frame_1, frame_2):
     frame_1["key"] = 0
     frame_2["key"] = 0

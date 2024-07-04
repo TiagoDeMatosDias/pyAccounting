@@ -15,6 +15,15 @@ The config files generally contain paths that are relative to the project root f
 
 This flexibility allows you to use the outputs of certain runs as inputs for other runs, so long as the run is done in order.
 
+## Building
+
+Run:
+
+
+    pyinstaller main.py --onefile --windowed --name=pyAccounting
+
+
+
 ## Feedback
 
 Feel free to add functionality, open bug reports, etc...

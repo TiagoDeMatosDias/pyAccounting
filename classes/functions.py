@@ -71,7 +71,10 @@ class Functions:
         return combined
 
     def get_priceUpdates(entries):
-        return entries.loc[(entries['Type'] <= "PriceUpdate")  ]
+        return entries.loc[(entries['Type'] == "PriceUpdate")  ]
+
+    def get_transactions(entries):
+        return entries.loc[(entries['Type'] == "Transaction")  ]
 
     def get_price(priceUpdates, ticker, currency, depth, maxDepth, latest = None):
         prices = priceUpdates.loc[ (priceUpdates['Quantity_Type'] == ticker) ]
@@ -99,7 +102,33 @@ class Functions:
                         return price
         return 0
 
-    def generate_unique_uuid():
+    def get_LatestPrice(PriceChanges, date, Ticker, currency, depth, maxDepth):
+        if Ticker == currency:
+            return 1
+
+        priceOptions = PriceChanges.loc[(PriceChanges['Date'] <= date) & (PriceChanges['Quantity_Type'] == Ticker)][
+            "Cost_Type"].unique()
+        if len(priceOptions) == 0:
+            return 0
+
+        try:
+            price = PriceChanges.loc[(PriceChanges['Date'] <= date) & (PriceChanges['Quantity_Type'] == Ticker) & (
+                        PriceChanges['Cost_Type'] == currency)].sort_values(by="Date", ascending=False).iloc[0]['Cost']
+        except:
+            depth = depth + 1
+            if depth < maxDepth:
+
+                for option in priceOptions:
+                    price = Functions.get_LatestPrice(PriceChanges, date, option, currency, depth, maxDepth)
+                    if price != None:
+                        price = price * Functions.get_LatestPrice(PriceChanges, date, Ticker, option, depth, maxDepth)
+                        return price
+            return 0
+        return price
+
+
+
+    def generate_unique_uuid( self):
        return str(uuid.uuid4())
 
     def log(logData):
@@ -108,3 +137,10 @@ class Functions:
             log = time + ": " + str(logData)
             myfile.write(log)
         print( log)
+
+    def get_runParameter(run, parameter):
+        try:
+            output = run[parameter]
+        except:
+            output = None
+        return output

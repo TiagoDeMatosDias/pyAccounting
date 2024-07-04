@@ -119,27 +119,15 @@ def command_runningTotal(run, config):
     input = f.get_full_Path(run["input"])
     output = f.get_full_Path(run["output"])
 
+    startDate = f.get_runParameter(run, "startDate")
+    endDate = f.get_runParameter(run, "endDate")
+    increment = f.get_runParameter(run, "increment")
+    AccountFilter = f.get_runParameter(run, "AccountFilter")
+    fairValueCurrency = f.get_runParameter(run, "fairValueCurrency")
 
-    try:
-       startDate = run["startDate"]
-    except:
-       startDate = None
-
-    try:
-       endDate = run["endDate"]
-    except:
-       endDate = None
-
-    increment = run["increment"]
-
-    try:
-       AccountFilter = run["AccountFilter"]
-    except:
-       AccountFilter = None
-
-    fairValueCurrency = run["fairValueCurrency"]
 
     entries = pandas.read_file(input,separator )
+    entries = f.get_transactions(entries)
 
     if startDate == None:
         startDate = entries["Date"].min()
@@ -152,22 +140,33 @@ def command_runningTotal(run, config):
     else:
         account = entries
 
-    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_dateFrame(startDate, endDate, increment), pandas.get_uniqueFrame(account,"Account"))
+    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_dateFrame(startDate, endDate, increment),
+                                                     pandas.get_uniqueFrame(account, "Account"))
 
-    runningTotalFrame = pandas.get_crossJoinedFrames(runningTotalFrame, pandas.get_uniqueFrame(entries,"Quantity_Type"))
+    runningTotalFrame = pandas.get_crossJoinedFrames(runningTotalFrame,
+                                                     pandas.get_uniqueFrame(entries, "Quantity_Type"))
 
-    runningTotalFrame["Quantity"] = runningTotalFrame.apply(  lambda x: pandas.get_runningTotal(entries, x["Date"], x["Account"], x["Quantity_Type"], "Quantity"), axis=1)
+    runningTotalFrame = runningTotalFrame.dropna(subset=["Account", "Date", "Quantity_Type"])
 
+    change = entries.groupby(by=[pd.Grouper(key='Date', freq=increment), "Account", "Quantity_Type"])["Quantity"].sum()
+    result = runningTotalFrame.merge(change, how="left", on=["Date", "Account", "Quantity_Type"])
+    result = result.fillna(0)
+    result = pandas.get_cumulativesum(result)
+
+    prices = f.get_priceUpdates(entries)
     if fairValueCurrency != None:
-        outputList = runningTotalFrame[["Date", "Account", "Quantity_Type", "Quantity"]]
-        priceupdates = f.get_priceUpdates(entries)
-        outputList["FairValue"] = runningTotalFrame.apply(lambda x: Decimal (x["Quantity"] ) * Decimal(f.get_price(priceupdates, x["Quantity_Type"], fairValueCurrency, 0, 5, x["Date"] )), axis=1)
-        outputList["Currency"] = fairValueCurrency
-        outputList = outputList[["Date", "Account", "Currency", "FairValue"]]
-        outputList = outputList.groupby(["Date", "Account", "Currency" ]).sum().reset_index()
+        result["Price"] = result.apply(lambda x: f.get_LatestPrice(prices, x["Date"], x["Quantity_Type"], fairValueCurrency, 0,5  ), axis=1)
+        result["RunningTotal_FairValue"] = result.apply(lambda x: x["Price"] * x["RunningTotal"], axis=1)
+        outputList = result[
+            ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "RunningTotal_FairValue"]].rename(
+            columns={
+                "Quantity": "Change"
+            })
     else:
-        outputList = runningTotalFrame
-
+        outputList = result[["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal"]].rename(
+        columns={
+            "Quantity": "Change"
+        } )
 
     pandas.write_file_balance(outputList,output,separator)
 
