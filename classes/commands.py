@@ -124,18 +124,20 @@ def command_runningTotal(run, config):
     increment = f.get_runParameter(run, "increment")
     AccountFilter = f.get_runParameter(run, "AccountFilter")
     fairValueCurrency = f.get_runParameter(run, "fairValueCurrency")
+    groupTypes = f.get_runParameter(run, "groupTypes")
 
 
-    entries = pandas.read_file(input,separator )
-    PriceChanges = f.get_priceUpdates(entries)
-    entries = f.get_transactions(entries)
+    e = pandas.read_file(input,separator )
+
+    PriceChanges = f.get_priceUpdates(e)
+    entries = f.get_transactions(e)
 
 
     if startDate == None:
-        startDate = entries["Date"].min()
+        startDate = e["Date"].min()
 
     if endDate == None:
-        endDate = entries["Date"].max()
+        endDate = e["Date"].max()
 
     if AccountFilter != None:
         account = entries[entries['Account'].str.contains(AccountFilter, na=False)]
@@ -169,7 +171,14 @@ def command_runningTotal(run, config):
             columns={
                 "Quantity": "Change"
             })
+
+        if groupTypes == "True":
+            outputList = outputList[["Date", "Account", "RunningTotal_FairValue"]]
+            outputList = outputList.groupby(["Date","Account"]).sum().reset_index()
+
+
     else:
+
         outputList = result[["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal"]].rename(
         columns={
             "Quantity": "Change"

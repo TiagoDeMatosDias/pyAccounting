@@ -53,7 +53,7 @@ def convert_transaction(row, parser_config, rules):
     name = str(str(row["Payee"]) + "_" + str(row["Account number"]) + str(row["Payment reference"]) ).replace(" ", "")
 
     account = get_Account(name, parser_config, rules)
-    id = "N26_" + str(functions.generate_unique_uuid())
+    id = "N26_" + str(functions.generate_unique_uuid)
 
     # entry 1
     Date.append(row["Date"])
