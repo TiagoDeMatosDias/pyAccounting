@@ -10,7 +10,7 @@ if __name__ == '__main__':
     runs = f.import_json(config["Runs"])
     for run in runs["Runs"]:
         f.log(run)
-        commands.run_command(run, config, f)
+        commands.run_command(run, config)
     f.log("Done")
 
 

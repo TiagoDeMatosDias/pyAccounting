@@ -50,7 +50,8 @@ def command_benchmark(run, config):
 
     for index, row in entries_filtered.iterrows():
         date = row["Date"]
-        price = f.get_price(entries, benchmarkTicker, row["Quantity_Type"], 0, maxDepth, row["Date"])
+        priceChanges = f.get_priceUpdates(entries)
+        price = f.get_LatestPrice(priceChanges,row["Date"], benchmarkTicker, row["Quantity_Type"], 0, maxDepth)
         if price == None:
             quantity = 0
         else:
@@ -77,42 +78,59 @@ def command_balance(run, config):
     separator = config["CSV_Separator"]
     input = f.get_full_Path(run["input"])
     output = f.get_full_Path(run["output"])
+
+
     increment = run["increment"]
-    entries = pandas.read_file(input,separator )
-    entries["Year"] = entries["Date"].dt.year
-    entries["Quarter"] = entries["Date"].dt.quarter
-    entries["Month"] = entries["Date"].dt.month
-    fairValue = run["fairValue"]
 
-    if run["fairValue"]:
-        fairValueCurrency = run["fairValueCurrency"]
-        fairValueDate = run["fairValueDate"]
-        entries = entries.loc[entries['Date'] <= fairValueDate]
-        prices = f.get_priceUpdates(entries)
+    e = pandas.read_file(input,separator )
+    PriceChanges = f.get_priceUpdates(e)
+    entries = f.get_transactions(e)
 
-    if increment == "Latest":
-        e = entries[["Account","Quantity_Type","Quantity"]]
-        balance = e.groupby(["Account", "Quantity_Type"]).sum().reset_index()
+    AccountFilter = f.get_runParameter(run, "AccountFilter")
+    fairValueCurrency = f.get_runParameter(run, "fairValueCurrency")
+    groupTypes = f.get_runParameter(run, "groupTypes")
 
-    elif increment == "Year":
-        e = entries[["Year","Account","Quantity_Type","Quantity"]]
-        balance = e.groupby(["Year","Account", "Quantity_Type"]).sum().reset_index()
+    if AccountFilter != None:
+        account = entries[entries['Account'].str.contains(AccountFilter, na=False)]
+    else:
+        account = entries
 
-    elif increment == "Quarter":
-        e = entries[["Year","Quarter","Account","Quantity_Type","Quantity"]]
-        balance = e.groupby(["Year","Quarter","Account", "Quantity_Type"]).sum().reset_index()
+    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_uniqueFrame(account, "Account"),     pandas.get_uniqueFrame(entries, "Quantity_Type"))
+    runningTotalFrame = runningTotalFrame.dropna(subset=["Account", "Quantity_Type"])
 
-    elif increment == "Month":
-        e = entries[["Year","Month","Account","Quantity_Type","Quantity"]]
-        balance = e.groupby(["Year","Month","Account", "Quantity_Type"]).sum().reset_index()
 
-    if fairValue:
-       balance["Fair Value"] = balance.apply( lambda x: Decimal( x["Quantity"] ) * Decimal( f.get_price(prices,x["Quantity_Type"], fairValueCurrency, 0, 5 ) ), axis=1)
+    change = entries.groupby( ["Account", "Quantity_Type"])["Quantity"].sum()
+    result = runningTotalFrame.merge(change, how="left", on=["Account", "Quantity_Type"])
+    result = result.fillna(0)
+    result = pandas.get_cumulativesum(result)
 
-    pandas.write_file_balance(balance,output,separator)
+    if fairValueCurrency != None:
+        result["Price"] = result.apply(  lambda x: f.get_LatestPrice(PriceChanges, e["Date"].max(), x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
+        result["RunningTotal_FairValue"] =  result['RunningTotal'] * result['Price']
+        result["Change_FairValue"] =  result['Quantity'] * result['Price']
+
+        outputList = result[
+            [ "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "Change_FairValue", "RunningTotal_FairValue"]].rename(
+            columns={
+                "Quantity": "Change"
+            })
+
+        if groupTypes == "True":
+            outputList = outputList[["Account", "Change_FairValue", "RunningTotal_FairValue"]]
+            outputList = outputList.groupby(["Account"]).sum().reset_index()
+
+
+    else:
+
+        outputList = result[[ "Account", "Quantity_Type", "Quantity", "RunningTotal"]].rename(
+        columns={
+            "Quantity": "Change"
+        } )
+
+    pandas.write_file_balance(outputList,output,separator)
+
 
     pass
-
 
 def command_runningTotal(run, config):
     separator = config["CSV_Separator"]
@@ -165,15 +183,16 @@ def command_runningTotal(run, config):
         UniquePriceCombo["Price"] = UniquePriceCombo.apply( lambda x: f.get_LatestPrice(PriceChanges, x["Date"], x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
         result = result.merge(UniquePriceCombo, on=["Date", "Quantity_Type"], how="inner")
         result["RunningTotal_FairValue"] = result.apply( lambda x: x["RunningTotal"] * x["Price"], axis=1)
+        result["Change_FairValue"] = result.apply( lambda x: x["Quantity"] * x["Price"], axis=1)
 
         outputList = result[
-            ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "RunningTotal_FairValue"]].rename(
+            ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "Change_FairValue", "RunningTotal_FairValue"]].rename(
             columns={
                 "Quantity": "Change"
             })
 
         if groupTypes == "True":
-            outputList = outputList[["Date", "Account", "RunningTotal_FairValue"]]
+            outputList = outputList[["Date", "Account", "Change_FairValue", "RunningTotal_FairValue"]]
             outputList = outputList.groupby(["Date","Account"]).sum().reset_index()
 
 
@@ -190,8 +209,7 @@ def command_runningTotal(run, config):
 
 class Commands:
 
-    def run_command(run, config, functions):
-
+    def run_command(run, config):
         if run["task"] == "parser":
             command_parser(run, config)
         elif run["task"] == "merge":
@@ -207,4 +225,4 @@ class Commands:
             command_runningTotal(run, config)
             pass
         else:
-            print("Other")
+            f.log("Other Command")

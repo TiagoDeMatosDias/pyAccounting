@@ -357,7 +357,7 @@ def get_Transfer(object, parser_config):
     Type.append( "Transaction")
     ID.append( "IBKR_" + object['transactionID'])
     Name.append( object['description'])
-    Account.append(  "Assets" + account_separator + account_subAccount + account_separator + object['accountId'] + account_separator + object['type'])
+    Account.append(  "Assets" + account_separator + account_subAccount + account_separator + object['type'])
     Quantity.append(  Decimal(object['quantity']).copy_negate())
     Quantity_Type.append(  object['symbol'])
     Cost.append(  object['positionAmount'])

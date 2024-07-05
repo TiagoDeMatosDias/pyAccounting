@@ -15,15 +15,6 @@ def write_file_balance(entries, output, separator):
     entries.to_csv(outputfile, sep=separator, index=False, mode="w", header=True)
     pass
 
-
-def get_runningTotal(entries, date, Account, Quantity_Type, sumColumn):
-
-    filtered = entries.loc[(entries['Date'] <= date) & (entries['Account'] == Account) & (entries['Quantity_Type'] == Quantity_Type) ]
-    if len(filtered) == 0:
-        return 0
-    else:
-        return filtered[sumColumn].sum()
-
 def get_cumulativesum(entries):
     entries["RunningTotal"] = entries.groupby(by=["Account","Quantity_Type"])["Quantity"].cumsum(skipna=True)
     return entries

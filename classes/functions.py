@@ -18,26 +18,12 @@ class Functions:
             return data
     pass
 
-    def get_working_Directory(self):
-        return os.getcwd()
-    pass
-
     def get_full_Path(relativePath, filename=None):
         if filename==None:
             return os.path.join(os.getcwd(), relativePath)
         else:
             return os.path.join(os.getcwd(), relativePath, filename)
     pass
-
-
-
-    def convert_Decimal(value)-> Decimal:
-        try:
-            return Decimal(value)
-        except:
-            return Decimal(0.00)
-        pass
-
 
 
     def get_ListFilesInDir(folder):
@@ -50,15 +36,9 @@ class Functions:
         return root
     pass
 
-
     def get_XML_Tag_All(XML):
         return [{'tag': elem.tag, 'attrs': elem.attrib} for elem in XML.iter() ]
     pass
-
-    def get_XML_Tag(XML, tag):
-        return [{'tag': elem.tag, 'attrs': elem.attrib} for elem in XML.iter() if elem.tag == tag]
-    pass
-
 
     def combine_lists(dict1, dict2):
         combined = {}
@@ -76,31 +56,6 @@ class Functions:
     def get_transactions(entries):
         return entries.loc[(entries['Type'] == "Transaction")  ]
 
-    def get_price(priceUpdates, ticker, currency, depth, maxDepth, latest = None):
-        prices = priceUpdates.loc[ (priceUpdates['Quantity_Type'] == ticker) ]
-        if latest != None:
-            prices = prices.loc[prices['Date'] <= latest]
-        priceOptions = prices["Cost_Type"].unique()
-
-        price = None
-        depth = depth + 1
-
-        if ticker == currency:
-            return 1
-
-        for typer in priceOptions:
-            if typer == currency:
-                prices = prices.loc[prices['Cost_Type'] == currency].sort_values(by="Date", ascending=False)
-                return prices["Cost"].iloc[0]
-
-        if price == None:
-            if depth <= maxDepth:
-                for option in priceOptions:
-                    price = Functions.get_price(priceUpdates, option, currency, depth, maxDepth, latest)
-                    if price != None:
-                        price = Decimal( price ) * Decimal( Functions.get_price(priceUpdates, ticker, option, depth, maxDepth, latest) )
-                        return price
-        return 0
 
     def get_LatestPrice(PriceChanges, date, Ticker, currency, depth, maxDepth):
         if Ticker == currency:

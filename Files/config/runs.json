@@ -2,14 +2,25 @@
   "Runs": [
 
     {
-      "output": "Files\\output\\output_4_RunningTotal.csv",
+      "output": "Files\\output\\output_2_benchmark.csv",
+	  "input": "Files\\output\\output_2_merge.csv",
+      "task": "benchmark",
+	  "benchmark": "Assets:Transfers:IBKR",
+      "benchmarkAccountId": "IBKR_",
+      "maxDepth": 5,
+	  "benchmarkTicker": "VWCE",
+	  "runId":"1"
+    },
+    {
+      "output": "Files\\output\\output_3_balance.csv",
       "input": "Files\\output\\output_2_benchmark.csv",
-      "task": "runningTotal",
-      "startDate": "2020-12-13",
-      "endDate": "2021-07-30",
-      "increment": "W",
+      "task": "balance",
+      "type": "IBKR",
+      "increment": "Quarter",
+      "fairValueDate": "2024-06-29",
+      "fairValue": true,
       "fairValueCurrency": "EUR",
-	  "runId":"4"
+	  "runId":"3"
     }
   ]
 }
