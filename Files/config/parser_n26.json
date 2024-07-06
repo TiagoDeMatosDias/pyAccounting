@@ -3,7 +3,7 @@
     "DefaultCurrency": "EUR",
     "SubAccounts": "Assets:Banks:n26:MainAccount:Cash",
     "UndefinedAccount" : "Expenses:n26:Unregistered",
-    "input":"Files\\Input\\n26",
+    "input":"Files/input/n26",
     "DateColumn": "Date",
     "separator": ",",
     "RulesTable": "Files/config/private/rules_n26.csv",

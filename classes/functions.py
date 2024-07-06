@@ -13,10 +13,13 @@ from decimal import Decimal
 
 class Functions:
     def import_json(filename):
-        with open(filename, "r") as read_file:
+
+        with open(Functions.get_full_Path(filename), "r") as read_file:
             data = json.load(read_file)
             return data
     pass
+
+
 
     def get_full_Path(relativePath, filename=None):
         if filename==None:

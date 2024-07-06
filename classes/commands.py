@@ -191,7 +191,7 @@ def command_runningTotal(run, config):
                 "Quantity": "Change"
             })
 
-        if groupTypes == "True":
+        if groupTypes == True:
             outputList = outputList[["Date", "Account", "Change_FairValue", "RunningTotal_FairValue"]]
             outputList = outputList.groupby(["Date","Account"]).sum().reset_index()
 
