@@ -209,16 +209,35 @@ def command_runningTotal(run, config):
 
 def command_chart(run, config):
 
+    # We get the initial parameters, including the separator and the input and output location
     separator = config["CSV_Separator"]
     input = f.get_full_Path(run["input"])
     output = f.get_full_Path(run["output"])
-
     type = f.get_runParameter(run, "type")
+    index_Name = f.get_runParameter(run, "index_Name")
+    column_Name = f.get_runParameter(run, "column_Name")
+    value_Name = f.get_runParameter(run, "value_Name")
+    colormap = f.get_runParameter(run, "colormap")
+    title = f.get_runParameter(run, "title")
+    invert = f.get_runParameter(run, "invert")
 
+    # We get the input data
+    data = pandas.read_file(input,separator )
+
+    # We get the filter rules and adjust our input data accordingly
+    filters = f.get_runParameter(run, "filters")
+    data = f.run_filters(data,filters )
+
+    # We invert the values if required
+    if invert:
+        data[value_Name] = -data[value_Name]
+
+    # We import the charting class
+    import classes.charts as charts
+
+    # we call the relevant charting function
     if type == "stackedBar":
-
-
-
+        charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap )
 
     pass
 

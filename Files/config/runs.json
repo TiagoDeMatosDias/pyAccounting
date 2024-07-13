@@ -9,6 +9,7 @@
       "column_Name":"Account",
       "value_Name":"Change_FairValue",
       "colormap": "Paired",
+      "title": "Dividends on a Quarterly Basis",
       "invert": true,
       "filters": [
         {
@@ -24,10 +25,61 @@
         {
           "type": "Max",
           "column": "Change_FairValue",
-          "value": "0"
+          "value": -0.01
+        }
+      ],
+	  "runId":"0"
+    },
+    {
+      "input": "Files/output/output_4_RunningTotal_QE.csv",
+      "task": "chart",
+      "type": "stackedBar",
+      "output": "Files/output/chart_02.png",
+      "index_Name":"Date",
+      "column_Name":"Account",
+      "value_Name":"RunningTotal_FairValue",
+      "colormap": "Paired",
+      "title": "Assets on a Quarterly Basis",
+      "invert": false,
+      "filters": [
+        {
+          "type": "Contains",
+          "column": "Account",
+          "value": "Assets:"
+        },
+        {
+          "type": "Min",
+          "column": "RunningTotal_FairValue",
+          "value": 0.00
+        }
+      ],
+	  "runId":"0"
+    },
+    {
+      "input": "Files/output/output_4_RunningTotal_QE.csv",
+      "task": "chart",
+      "type": "stackedBar",
+      "output": "Files/output/chart_03.png",
+      "index_Name":"Date",
+      "column_Name":"Quantity_Type",
+      "value_Name":"RunningTotal_FairValue",
+      "colormap": "Paired",
+      "title": "Assets on a Quarterly Basis",
+      "invert": false,
+      "filters": [
+        {
+          "type": "Contains",
+          "column": "Account",
+          "value": "Assets:"
+        },
+        {
+          "type": "Min",
+          "column": "RunningTotal_FairValue",
+          "value": 0.00
         }
       ],
 	  "runId":"0"
     }
+
   ]
 }

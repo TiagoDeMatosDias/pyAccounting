@@ -105,3 +105,22 @@ class Functions:
         if output == "":
             output = None
         return output
+
+    def run_filters(data, filters):
+        filtered_data = data
+        for filter in filters:
+            type = Functions.get_runParameter(filter, "type")
+            column = Functions.get_runParameter(filter, "column")
+            value = Functions.get_runParameter(filter, "value")
+            filtered_data = Functions.filter_data(filtered_data, type, column, value)
+        return filtered_data
+
+    def filter_data(data, type, column, value):
+        if type == "Min":
+            return data.loc[(data[column] >= value)]
+        elif type == "Max":
+            return data.loc[(data[column] <= value)]
+        elif type == "Contains":
+            return data.loc[(data[column].str.contains(value)==True)]
+        else:
+            return data

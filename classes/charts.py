@@ -1,4 +1,4 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import seaborn as sns
 def generate_pieChart(df, Columns_Name, Values_Name, SaveLocation):
      fig, ax = plt.subplots(figsize=(10, 5))
@@ -7,8 +7,9 @@ def generate_pieChart(df, Columns_Name, Values_Name, SaveLocation):
 
 
 def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap):
+
      # Pivot the dataframe
-     data_pivot = data.pivot(index=Index_Name, columns=Columns_Name, values=Values_Name).fillna(0)
+     data_pivot = data.pivot_table(index=Index_Name, columns=Columns_Name, values=Values_Name, aggfunc="sum").fillna(0)
 
      # Create a larger figure
      fig, ax = plt.subplots(figsize=(12, 8))
