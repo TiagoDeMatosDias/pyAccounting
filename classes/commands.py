@@ -38,15 +38,20 @@ def command_merge(run, config):
     pass
 
 def command_benchmark(run, config):
+    # We get the initial parameters, including the separator and the input and output location
     separator = config["CSV_Separator"]
     input = f.get_full_Path(run["input"])
     output = f.get_full_Path(run["output"])
+    benchmarkTicker = f.get_runParameter(run, "benchmarkTicker")
+    maxDepth = f.get_runParameter(run, "maxDepth")
+
+    # We read the file
     entries = pandas.read_file(input,separator )
+
+
     entries_filtered = entries.loc[entries['Type'] == "Transaction"]
     entries_filtered = entries_filtered.loc[entries_filtered['Account'] == run["benchmark"]]
     entries_filtered = entries_filtered.loc[entries_filtered['ID'].str.contains("IBKR_")]
-    benchmarkTicker = run["benchmarkTicker"]
-    maxDepth =  run["maxDepth"]
 
     for index, row in entries_filtered.iterrows():
         date = row["Date"]
@@ -70,132 +75,149 @@ def command_benchmark(run, config):
         }])
 
         entries = pd.concat([entries, benchmarkEntry], ignore_index=True)
+
+    # We write the output to a file
     pandas.write_file_entries(entries,output,separator)
 
     pass
 
 def command_balance(run, config):
+
+    # We get the initial parameters, including the separator and the input and output location
     separator = config["CSV_Separator"]
     input = f.get_full_Path(run["input"])
     output = f.get_full_Path(run["output"])
-
-
-    increment = run["increment"]
-
-    e = pandas.read_file(input,separator )
-    PriceChanges = f.get_priceUpdates(e)
-    entries = f.get_transactions(e)
-
-    AccountFilter = f.get_runParameter(run, "AccountFilter")
     fairValueCurrency = f.get_runParameter(run, "fairValueCurrency")
+    fairValueDate = f.get_runParameter(run, "fairValueDate")
     groupTypes = f.get_runParameter(run, "groupTypes")
 
-    if AccountFilter != None:
-        account = entries[entries['Account'].str.contains(AccountFilter, na=False)]
-    else:
-        account = entries
+    # We read the data
+    e = pandas.read_file(input,separator )
 
-    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_uniqueFrame(account, "Account"),     pandas.get_uniqueFrame(entries, "Quantity_Type"))
+    # We get only the price updates up to the fair value date
+    PriceChanges = f.get_priceUpdates(e)
+    PriceChanges = f.filter_data(PriceChanges, "Max", "Date", fairValueDate)
+
+    # We get only the transactions
+    data = f.get_transactions(e)
+
+    # We get the filter rules and adjust our input data accordingly
+    filters = f.get_runParameter(run, "filters")
+    data = f.run_filters(data,filters )
+
+
+    # We get the cross join frame
+    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_uniqueFrame(data, "Account"),     pandas.get_uniqueFrame(data, "Quantity_Type"))
     runningTotalFrame = runningTotalFrame.dropna(subset=["Account", "Quantity_Type"])
 
+    # We get the data for the frame and do the sum
+    change = data.groupby( ["Account", "Quantity_Type"])["Quantity"].sum()
 
-    change = entries.groupby( ["Account", "Quantity_Type"])["Quantity"].sum()
+    # We merge the sums with the cross join, filling out the empty values
     result = runningTotalFrame.merge(change, how="left", on=["Account", "Quantity_Type"])
     result = result.fillna(0)
-    result = pandas.get_cumulativesum(result)
 
+    # If we have a fair value currency, we use it to get the fair value of the balance at the last date
     if fairValueCurrency != None:
-        result["Price"] = result.apply(  lambda x: f.get_LatestPrice(PriceChanges, e["Date"].max(), x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
-        result["RunningTotal_FairValue"] =  result['RunningTotal'] * result['Price']
+        # We set the price of the assets
+        result["Price"] = result.apply(  lambda x: f.get_LatestPrice(PriceChanges, fairValueDate, x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
+
+        # We generate the Fair Value columns based on the Price
         result["Change_FairValue"] =  result['Quantity'] * result['Price']
 
+        # We generate the output
         outputList = result[
-            [ "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "Change_FairValue", "RunningTotal_FairValue"]].rename(
+            [ "Account", "Quantity_Type", "Quantity",  "Price", "Change_FairValue"]].rename(
             columns={
                 "Quantity": "Change"
             })
 
-        if groupTypes == "True":
-            outputList = outputList[["Account", "Change_FairValue", "RunningTotal_FairValue"]]
+        #We determine if we want to group the types into a single one
+        if groupTypes:
+            outputList = outputList[["Account", "Change_FairValue"]]
             outputList = outputList.groupby(["Account"]).sum().reset_index()
 
-
+    #If we don't want the fair value then we get just the balance
     else:
-
-        outputList = result[[ "Account", "Quantity_Type", "Quantity", "RunningTotal"]].rename(
+        outputList = result[[ "Account", "Quantity_Type", "Quantity"]].rename(
         columns={
             "Quantity": "Change"
         } )
 
+    # We write the output to a file
     pandas.write_file_balance(outputList,output,separator)
 
 
     pass
 
 def command_runningTotal(run, config):
+    # We get the initial parameters, including the separator and the input and output location
     separator = config["CSV_Separator"]
     input = f.get_full_Path(run["input"])
     output = f.get_full_Path(run["output"])
-
-    startDate = f.get_runParameter(run, "startDate")
-    endDate = f.get_runParameter(run, "endDate")
     increment = f.get_runParameter(run, "increment")
-    AccountFilter = f.get_runParameter(run, "AccountFilter")
     fairValueCurrency = f.get_runParameter(run, "fairValueCurrency")
     groupTypes = f.get_runParameter(run, "groupTypes")
 
-
+    # We read the data
     e = pandas.read_file(input,separator )
 
+    # We get only the price updates
     PriceChanges = f.get_priceUpdates(e)
-    entries = f.get_transactions(e)
 
+    # We get only the transactions
+    data = f.get_transactions(e)
 
-    if startDate == None:
-        startDate = e["Date"].min()
+    # We get the filter rules and adjust our input data accordingly
+    filters = f.get_runParameter(run, "filters")
+    data = f.run_filters(data,filters )
 
-    if endDate == None:
-        endDate = e["Date"].max()
+    # We define the start and end date
+    startDate = data["Date"].min()
+    endDate = data["Date"].max()
 
-    if AccountFilter != None:
-        account = entries[entries['Account'].str.contains(AccountFilter, na=False)]
-    else:
-        account = entries
-
+    # We cross join the frames to get the Date, Account, Quantity_Type index
     runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_dateFrame(startDate, endDate, increment),
-                                                     pandas.get_uniqueFrame(account, "Account"))
+                                                     pandas.get_uniqueFrame(data, "Account"))
 
     runningTotalFrame = pandas.get_crossJoinedFrames(runningTotalFrame,
-                                                     pandas.get_uniqueFrame(entries, "Quantity_Type"))
+                                                     pandas.get_uniqueFrame(data, "Quantity_Type"))
 
+    # We drop the empty subsets
     runningTotalFrame = runningTotalFrame.dropna(subset=["Account", "Date", "Quantity_Type"])
 
-    change = entries.groupby(by=[pd.Grouper(key='Date', freq=increment), "Account", "Quantity_Type"])["Quantity"].sum()
+    # We get the changes and cumulative sum
+    change = data.groupby(by=[pd.Grouper(key='Date', freq=increment), "Account", "Quantity_Type"])["Quantity"].sum()
     result = runningTotalFrame.merge(change, how="left", on=["Date", "Account", "Quantity_Type"])
     result = result.fillna(0)
     result = pandas.get_cumulativesum(result)
 
 
 
-
+    # We check if we want the fair value
     if fairValueCurrency != None:
+        # We generate a table with the prices by period
         UniquePriceCombo = pandas.get_crossJoinedFrames(pandas.get_dateFrame(startDate, endDate, increment), pandas.get_uniqueFrame(result, "Quantity_Type"))
         UniquePriceCombo["Price"] = UniquePriceCombo.apply( lambda x: f.get_LatestPrice(PriceChanges, x["Date"], x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
+
+        # We merge the price table into the overall table, and multiply the quantity by the price to get the fair value
         result = result.merge(UniquePriceCombo, on=["Date", "Quantity_Type"], how="inner")
         result["RunningTotal_FairValue"] = result.apply( lambda x: x["RunningTotal"] * x["Price"], axis=1)
         result["Change_FairValue"] = result.apply( lambda x: x["Quantity"] * x["Price"], axis=1)
 
+        # We generate the output
         outputList = result[
             ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "Change_FairValue", "RunningTotal_FairValue"]].rename(
             columns={
                 "Quantity": "Change"
             })
 
+        #We determine if we want to group the types into a single one
         if groupTypes == True:
             outputList = outputList[["Date", "Account", "Change_FairValue", "RunningTotal_FairValue"]]
             outputList = outputList.groupby(["Date","Account"]).sum().reset_index()
 
-
+    #If we don't want the fair value then we get just the change
     else:
 
         outputList = result[["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal"]].rename(
@@ -203,6 +225,7 @@ def command_runningTotal(run, config):
             "Quantity": "Change"
         } )
 
+    # We write the output to a file
     pandas.write_file_balance(outputList,output,separator)
 
     pass
@@ -220,6 +243,7 @@ def command_chart(run, config):
     colormap = f.get_runParameter(run, "colormap")
     title = f.get_runParameter(run, "title")
     invert = f.get_runParameter(run, "invert")
+    max_legend_entries = f.get_runParameter(run, "max_legend_entries")
 
     # We get the input data
     data = pandas.read_file(input,separator )
@@ -237,7 +261,7 @@ def command_chart(run, config):
 
     # we call the relevant charting function
     if type == "stackedBar":
-        charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap )
+        charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries)
 
     pass
 

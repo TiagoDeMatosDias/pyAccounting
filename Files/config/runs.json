@@ -8,8 +8,9 @@
       "index_Name":"Date",
       "column_Name":"Account",
       "value_Name":"Change_FairValue",
-      "colormap": "Paired",
+      "colormap": "inferno",
       "title": "Dividends on a Quarterly Basis",
+      "max_legend_entries": 5,
       "invert": true,
       "filters": [
         {
@@ -38,8 +39,9 @@
       "index_Name":"Date",
       "column_Name":"Account",
       "value_Name":"RunningTotal_FairValue",
-      "colormap": "Paired",
+      "colormap": "inferno",
       "title": "Assets on a Quarterly Basis",
+      "max_legend_entries": 10,
       "invert": false,
       "filters": [
         {
@@ -63,8 +65,9 @@
       "index_Name":"Date",
       "column_Name":"Quantity_Type",
       "value_Name":"RunningTotal_FairValue",
-      "colormap": "Paired",
+      "colormap": "inferno",
       "title": "Assets on a Quarterly Basis",
+      "max_legend_entries": 20,
       "invert": false,
       "filters": [
         {
@@ -80,6 +83,5 @@
       ],
 	  "runId":"0"
     }
-
   ]
 }
