@@ -101,4 +101,7 @@ class Functions:
             output = run[parameter]
         except:
             output = None
+
+        if output == "":
+            output = None
         return output

@@ -1,69 +1,33 @@
 {
   "Runs": [
     {
-      "output": "Files/output/output_0_parser.csv",
-      "task": "parser",
-      "type": "IBKR",
+      "input": "Files/output/output_4_RunningTotal_QE.csv",
+      "task": "chart",
+      "type": "stackedBar",
+      "output": "Files/output/chart_01.png",
+      "index_Name":"Date",
+      "column_Name":"Account",
+      "value_Name":"Change_FairValue",
+      "colormap": "Paired",
+      "invert": true,
+      "filters": [
+        {
+          "type": "Min",
+          "column": "Date",
+          "value": "2020-06-06"
+        },
+        {
+          "type": "Contains",
+          "column": "Account",
+          "value": "Dividends:"
+        },
+        {
+          "type": "Max",
+          "column": "Change_FairValue",
+          "value": "0"
+        }
+      ],
 	  "runId":"0"
-    },{
-      "output": "Files/output/output_1_parser.csv",
-      "task": "parser",
-      "type": "n26",
-	  "runId":"0"
-    },
-	{
-      "output": "Files/output/output_2_merge.csv",
-	  "input_1": "Files/output/output_0_parser.csv",
-      "input_2": "Files/input/Adjustments.csv",
-      "task": "merge",
-	  "runId":"1"
-    },
-	{
-      "output": "Files/output/output_2_merge.csv",
-	  "input_1": "Files/output/output_2_merge.csv",
-      "input_2": "Files/output/output_1_parser.csv",
-      "task": "merge",
-	  "runId":"1"
-    },
-    {
-      "output": "Files/output/output_2_benchmark.csv",
-	  "input": "Files/output/output_2_merge.csv",
-      "task": "benchmark",
-	  "benchmark": "Assets:Transfers:IBKR",
-      "benchmarkAccountId": "IBKR_",
-      "maxDepth": 5,
-	  "benchmarkTicker": "VWCE",
-	  "runId":"1"
-    },
-    {
-      "output": "Files/output/output_3_balance.csv",
-      "input": "Files/output/output_2_benchmark.csv",
-      "task": "balance",
-      "type": "IBKR",
-      "increment": "Quarter",
-      "fairValueDate": "2024-06-29",
-      "fairValue": true,
-      "fairValueCurrency": "EUR",
-	  "runId":"3"
-    },
-    {
-      "output": "Files/output/output_4_RunningTotal_QE.csv",
-      "input": "Files/output/output_2_benchmark.csv",
-      "task": "runningTotal",
-      "endDate": "2024-09-01",
-      "increment": "QE",
-      "fairValueCurrency": "EUR",
-	  "runId":"4"
-    },
-    {
-      "output": "Files/output/output_4_RunningTotal_ME_Group.csv",
-      "input": "Files/output/output_2_benchmark.csv",
-      "task": "runningTotal",
-      "endDate": "2024-09-01",
-      "increment": "ME",
-      "fairValueCurrency": "EUR",
-      "groupTypes": true,
-	  "runId":"4"
     }
   ]
 }

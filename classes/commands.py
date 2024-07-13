@@ -207,6 +207,21 @@ def command_runningTotal(run, config):
 
     pass
 
+def command_chart(run, config):
+
+    separator = config["CSV_Separator"]
+    input = f.get_full_Path(run["input"])
+    output = f.get_full_Path(run["output"])
+
+    type = f.get_runParameter(run, "type")
+
+    if type == "stackedBar":
+
+
+
+
+    pass
+
 class Commands:
 
     def run_command(run, config):
@@ -223,6 +238,9 @@ class Commands:
             pass
         elif run["task"] == "runningTotal":
             command_runningTotal(run, config)
+            pass
+        elif run["task"] == "chart":
+            command_chart(run, config)
             pass
         else:
             f.log("Other Command")
