@@ -15,15 +15,15 @@ def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLo
      fig, ax = plt.subplots(figsize=(12, 8))
 
      # Create a stacked bar chart
-     data_pivot.plot(kind='bar', stacked=True, colormap=colormap, ax=ax)
+     data_pivot.plot(kind='bar', stacked=True, colormap=colormap, ax=ax, label='Inline label')
 
      # Customize the plot
      ax.set_title(Title )
      ax.set_xlabel(Index_Name)
      ax.set_ylabel(Values_Name)
 
-     # Remove the legend
-     ax.legend().set_visible(False)
+
+     ax.legend().set_visible(True)
 
      # Save the plot to a file
      fig.savefig(SaveLocation)
