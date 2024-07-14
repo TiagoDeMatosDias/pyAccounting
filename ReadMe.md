@@ -35,7 +35,7 @@ You can use the charting functionality to generate images like these:
 
 ![Bar Chart](Documentation/Images/chart_01.png)
 
-![Pie Chart](Documentation/Images/chart_05.png)
+![Pie Chart](Documentation/Images/chart_04.png)
 
 
 ## Feedback
