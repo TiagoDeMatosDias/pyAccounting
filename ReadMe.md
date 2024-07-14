@@ -37,7 +37,6 @@ You can use the charting functionality to generate images like these:
 
 ![Pie Chart](Documentation/Images/chart_04.png)
 
-
 ## Feedback
 
 Feel free to add functionality, open bug reports, etc...
