@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 def generate_pieChart(data, Columns_Name, Values_Name, SaveLocation, Title, colormap):
-     fig, ax = plt.subplots(figsize=(20, 15))
+     # Sort the data by size so we have a progression
      data = data.sort_values(by=[Values_Name])
+
+     # Create a pie chart
+     fig, ax = plt.subplots(figsize=(20, 15))
      plt.pie(
           data[Values_Name],
           labels=data[Columns_Name],
@@ -14,9 +17,11 @@ def generate_pieChart(data, Columns_Name, Values_Name, SaveLocation, Title, colo
           )
      ax.set_title(Title )
 
+     # We add a hole in the middle
      hole = plt.Circle((0, 0), 0.45, facecolor='white')
      plt.gcf().gca().add_artist(hole)
 
+     # Save the plot to a file
      fig.savefig(SaveLocation)
 
 
@@ -29,13 +34,17 @@ def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLo
      fig, ax = plt.subplots(figsize=(20, 15))
 
      # Create a stacked bar chart
-     data_pivot.plot(kind='bar', stacked=True, ax=ax, label='Inline label')
+     data_pivot.plot(
+          kind='bar',
+          stacked=True,
+          ax=ax,
+          label='Inline label'
+     )
 
      # Customize the plot
      ax.set_title(Title )
      ax.set_xlabel(Index_Name)
      ax.set_ylabel(Values_Name)
-
      ax = get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name)
 
      data_pivot.plot(colormap=colormap)
