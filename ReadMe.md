@@ -33,9 +33,9 @@ You can find example IBKR, n26, etc... input files here:
 
 You can use the charting functionality to generate images like these:
 
-![](C:/programming/Finance/pyFin/pythonProject/Documentation/Images/chart_01.png)
+![Bar Chart](Documentation/Images/chart_01.png)
 
-![](C:\programming\Finance\pyFin\pythonProject\Documentation\Images\chart_05.png)
+![Pie Chart](Documentation/Images/chart_05.png)
 
 
 ## Feedback
