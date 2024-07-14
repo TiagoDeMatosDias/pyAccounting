@@ -2,7 +2,10 @@ import pandas as pd
 from classes.functions import Functions as f
 
 def read_file(filepath, separator):
-    entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator, parse_dates=["Date"], date_format="%Y-%m-%d")
+    try:
+        entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator, parse_dates=["Date"], date_format="%Y-%m-%d")
+    except:
+        entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator)
     return entries
 
 def write_file_entries(entries, output, separator):

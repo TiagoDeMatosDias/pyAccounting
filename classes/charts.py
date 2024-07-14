@@ -1,8 +1,22 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-def generate_pieChart(df, Columns_Name, Values_Name, SaveLocation):
-     fig, ax = plt.subplots(figsize=(10, 5))
-     plt.pie(df[Values_Name], labels=df[Columns_Name], autopct='%1.1f%%', pctdistance=1.25, labeldistance=1.6)
+def generate_pieChart(data, Columns_Name, Values_Name, SaveLocation, Title, colormap):
+     fig, ax = plt.subplots(figsize=(20, 15))
+     data = data.sort_values(by=[Values_Name])
+     plt.pie(
+          data[Values_Name],
+          labels=data[Columns_Name],
+          autopct='%1.1f%%',
+          pctdistance=1.25,
+          labeldistance=1.6,
+          colors= sns.color_palette(colormap),
+          startangle=90
+          )
+     ax.set_title(Title )
+
+     hole = plt.Circle((0, 0), 0.45, facecolor='white')
+     plt.gcf().gca().add_artist(hole)
+
      fig.savefig(SaveLocation)
 
 
@@ -15,24 +29,33 @@ def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLo
      fig, ax = plt.subplots(figsize=(20, 15))
 
      # Create a stacked bar chart
-     data_pivot.plot(kind='bar', stacked=True, colormap=colormap, ax=ax, label='Inline label')
+     data_pivot.plot(kind='bar', stacked=True, ax=ax, label='Inline label')
 
      # Customize the plot
      ax.set_title(Title )
      ax.set_xlabel(Index_Name)
      ax.set_ylabel(Values_Name)
 
-     # Customize the legend to show up to 10 entries
-     # Sort columns by the sum of values and keep only the top max_legend_entries
-     top_columns = data_pivot.sum().nlargest(max_legend_entries).index
+     ax = get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name)
 
-     # Add the legend with a limited number of entries
-     # Customize the legend to show up to 10 entries
-     handles, labels = ax.get_legend_handles_labels()
-     if len(handles) > max_legend_entries:
-          ax.legend(top_columns, top_columns, title=Columns_Name, loc='best')
-     else:
-          ax.legend(title=Columns_Name, loc='best')
+     data_pivot.plot(colormap=colormap)
 
      # Save the plot to a file
      fig.savefig(SaveLocation)
+
+def get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name ):
+     # Customize the legend to show up to max_legend_entries entries
+     # Sort columns by the sum of values and keep only the top max_legend_entries
+     top_columns = data_pivot.sum().nlargest(max_legend_entries).index
+     # Add the legend with a limited number of entries
+     handles, labels = ax.get_legend_handles_labels()
+     outlabels = []
+     outhandles = []
+     for x in range(len(handles)):
+          if labels[x] in top_columns:
+               outlabels.append(labels[x])
+               outhandles.append(handles[x])
+
+     ax.legend(outhandles, outlabels, title=Columns_Name, loc='best')
+
+     return ax

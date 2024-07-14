@@ -1,84 +1,26 @@
 {
   "Runs": [
+
     {
-      "input": "Files/output/output_4_RunningTotal_QE.csv",
+      "input": "Files/output/output_3_balance.csv",
       "task": "chart",
-      "type": "stackedBar",
-      "output": "Files/output/chart_01.png",
-      "index_Name":"Date",
+      "type": "pieChart",
+      "output": "Files/output/chart_04.png",
       "column_Name":"Account",
       "value_Name":"Change_FairValue",
-      "colormap": "inferno",
-      "title": "Dividends on a Quarterly Basis",
-      "max_legend_entries": 5,
-      "invert": true,
+      "colormap": "tab20c",
+      "title": "Expenses since inception",
+      "invert": false,
       "filters": [
-        {
-          "type": "Min",
-          "column": "Date",
-          "value": "2020-06-06"
-        },
         {
           "type": "Contains",
           "column": "Account",
-          "value": "Dividends:"
+          "value": "Expenses:"
         },
         {
-          "type": "Max",
+          "type": "Min",
           "column": "Change_FairValue",
-          "value": -0.01
-        }
-      ],
-	  "runId":"0"
-    },
-    {
-      "input": "Files/output/output_4_RunningTotal_QE.csv",
-      "task": "chart",
-      "type": "stackedBar",
-      "output": "Files/output/chart_02.png",
-      "index_Name":"Date",
-      "column_Name":"Account",
-      "value_Name":"RunningTotal_FairValue",
-      "colormap": "inferno",
-      "title": "Assets on a Quarterly Basis",
-      "max_legend_entries": 10,
-      "invert": false,
-      "filters": [
-        {
-          "type": "Contains",
-          "column": "Account",
-          "value": "Assets:"
-        },
-        {
-          "type": "Min",
-          "column": "RunningTotal_FairValue",
-          "value": 0.00
-        }
-      ],
-	  "runId":"0"
-    },
-    {
-      "input": "Files/output/output_4_RunningTotal_QE.csv",
-      "task": "chart",
-      "type": "stackedBar",
-      "output": "Files/output/chart_03.png",
-      "index_Name":"Date",
-      "column_Name":"Quantity_Type",
-      "value_Name":"RunningTotal_FairValue",
-      "colormap": "inferno",
-      "title": "Assets on a Quarterly Basis",
-      "max_legend_entries": 20,
-      "invert": false,
-      "filters": [
-        {
-          "type": "Contains",
-          "column": "Account",
-          "value": "Assets:"
-        },
-        {
-          "type": "Min",
-          "column": "RunningTotal_FairValue",
-          "value": 0.00
+          "value": 50
         }
       ],
 	  "runId":"0"

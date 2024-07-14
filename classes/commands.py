@@ -262,6 +262,8 @@ def command_chart(run, config):
     # we call the relevant charting function
     if type == "stackedBar":
         charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries)
+    if type == "pieChart":
+        charts.generate_pieChart(data, column_Name, value_Name, output,title, colormap )
 
     pass
 
