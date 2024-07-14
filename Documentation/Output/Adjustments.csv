@@ -1,0 +1,3 @@
+Date;Type;ID;Name;Account;Quantity;Quantity_Type;Cost;Cost_Type
+2017-01-01;Transaction;1111111111a;Bank Adjustment;Assets:Banks:Cash; 10;EUR;;
+2017-01-01;Transaction;1111111111a;Bank Adjustment;Equity:RetainedEarnings:InitialBalances; -10;EUR;;

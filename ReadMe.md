@@ -22,6 +22,20 @@ Run:
 
     pyinstaller main.py --onefile --windowed --name=pyAccounting
 
+## Example Input files
+
+You can find example IBKR, n26, etc... input files here:
+
+[Documentation](Documentation)
+
+
+## Example Output Images
+
+You can use the charting functionality to generate images like these:
+
+![](C:/programming/Finance/pyFin/pythonProject/Documentation/Images/chart_01.png)
+
+![](C:\programming\Finance\pyFin\pythonProject\Documentation\Images\chart_05.png)
 
 
 ## Feedback

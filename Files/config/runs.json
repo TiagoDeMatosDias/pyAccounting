@@ -1,15 +1,18 @@
 {
   "Runs": [
 
+
     {
-      "input": "Files/output/output_3_balance.csv",
+      "input": "Files/output/output_4_RunningTotal_QE.csv",
       "task": "chart",
-      "type": "pieChart",
-      "output": "Files/output/chart_04.png",
+      "type": "stackedBar",
+      "output": "Files/output/chart_05.png",
+      "index_Name":"Date",
       "column_Name":"Account",
       "value_Name":"Change_FairValue",
       "colormap": "tab20c",
-      "title": "Expenses since inception",
+      "title": "Expenses by type on a Quarterly Basis",
+      "max_legend_entries": 20,
       "invert": false,
       "filters": [
         {
@@ -19,8 +22,8 @@
         },
         {
           "type": "Min",
-          "column": "Change_FairValue",
-          "value": 50
+          "column": "RunningTotal_FairValue",
+          "value": 100
         }
       ],
 	  "runId":"0"

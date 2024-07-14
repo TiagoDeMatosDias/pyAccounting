@@ -1,0 +1,2 @@
+"Date","Payee","Account number","Transaction type","Payment reference","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"
+"2017-02-01","ExamplePayee","ExampleAccount","Income","Test","25.0","","",""
