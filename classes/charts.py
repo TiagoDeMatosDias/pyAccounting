@@ -25,7 +25,7 @@ def generate_pieChart(data, Columns_Name, Values_Name, SaveLocation, Title, colo
      fig.savefig(SaveLocation)
 
 
-def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap,max_legend_entries):
+def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap,max_legend_entries, rounding):
 
      # Pivot the dataframe
      data_pivot = data.pivot_table(index=Index_Name, columns=Columns_Name, values=Values_Name, aggfunc="sum").fillna(0)
@@ -47,10 +47,23 @@ def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLo
      ax.set_ylabel(Values_Name)
      ax = get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name)
 
+
+     for bar in ax.patches:
+          height = bar.get_height()
+          width = bar.get_width()
+          x = bar.get_x()
+          y = bar.get_y()
+          label_text = round(height, rounding )
+          label_x = round( x + width / 2 , rounding)
+          label_y = round(y + height / 2, rounding)
+          ax.text(label_x, label_y, label_text, ha='center',
+                  va='center')
+
      data_pivot.plot(colormap=colormap)
 
      # Save the plot to a file
      fig.savefig(SaveLocation)
+     plt.close(fig)
 
 def get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name ):
      # Customize the legend to show up to max_legend_entries entries
@@ -68,3 +81,5 @@ def get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name 
      ax.legend(outhandles, outlabels, title=Columns_Name, loc='best')
 
      return ax
+
+# function to add value labels

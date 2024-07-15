@@ -17,7 +17,10 @@ def command_parser(run, config):
         outputFile = run["output"]
         write_Entries(outputFile, config)
         pass
-    elif run["type"] == "YahooFinance":
+    elif run["type"] == "yFinance":
+        from classes.parser_yFinance import write_Entries
+        write_Entries(run,config)
+
         pass
     pass
 
@@ -99,8 +102,8 @@ def command_balance(run, config):
     PriceChanges = f.filter_data(PriceChanges, "Max", "Date", fairValueDate)
 
     # We get only the transactions
-    data = f.get_transactions(e)
-
+    #data = f.get_transactions(e)
+    data = e
     # We get the filter rules and adjust our input data accordingly
     filters = f.get_runParameter(run, "filters")
     data = f.run_filters(data,filters )
@@ -166,7 +169,8 @@ def command_runningTotal(run, config):
     PriceChanges = f.get_priceUpdates(e)
 
     # We get only the transactions
-    data = f.get_transactions(e)
+    #data = f.get_transactions(e)
+    data = e
 
     # We get the filter rules and adjust our input data accordingly
     filters = f.get_runParameter(run, "filters")
@@ -244,6 +248,7 @@ def command_chart(run, config):
     title = f.get_runParameter(run, "title")
     invert = f.get_runParameter(run, "invert")
     max_legend_entries = f.get_runParameter(run, "max_legend_entries")
+    rounding  = f.get_runParameter(run, "rounding")
 
     # We get the input data
     data = pandas.read_file(input,separator )
@@ -261,7 +266,7 @@ def command_chart(run, config):
 
     # we call the relevant charting function
     if type == "stackedBar":
-        charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries)
+        charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
     if type == "pieChart":
         charts.generate_pieChart(data, column_Name, value_Name, output,title, colormap )
 
@@ -286,6 +291,9 @@ class Commands:
             pass
         elif run["task"] == "chart":
             command_chart(run, config)
+            pass
+        elif run["task"] == "PriceUpdate":
+            command_PriceUpdate(run, config)
             pass
         else:
             f.log("Other Command")

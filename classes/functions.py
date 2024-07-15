@@ -59,6 +59,8 @@ class Functions:
     def get_transactions(entries):
         return entries.loc[(entries['Type'] == "Transaction")  ]
 
+    def get_benchmark(entries):
+        return entries.loc[(entries['Type'] == "Benchmark")  ]
 
     def get_LatestPrice(PriceChanges, date, Ticker, currency, depth, maxDepth):
         if Ticker == currency:
@@ -122,5 +124,7 @@ class Functions:
             return data.loc[(data[column] <= value)]
         elif type == "Contains":
             return data.loc[(data[column].str.contains(value)==True)]
+        elif type == "Equals":
+            return data.loc[(data[column]==value)]
         else:
             return data
