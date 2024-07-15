@@ -292,8 +292,5 @@ class Commands:
         elif run["task"] == "chart":
             command_chart(run, config)
             pass
-        elif run["task"] == "PriceUpdate":
-            command_PriceUpdate(run, config)
-            pass
         else:
             f.log("Other Command")
