@@ -67,7 +67,7 @@ def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLo
 
 
 
-def generate_lineChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap,max_legend_entries, rounding):
+def generate_stackedlineChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap,max_legend_entries, rounding):
 
      # Pivot the dataframe
      data_pivot = data.pivot_table(index=Index_Name, columns=Columns_Name, values=Values_Name, aggfunc="sum").fillna(0)

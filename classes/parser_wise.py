@@ -30,9 +30,9 @@ def import_Entries(parserLocation):
 
 def get_entriesFromFile(inputFile, parser_config, rules):
     entries = []
-    n26 = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=[parser_config["DateColumn"]])
+    data = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=[parser_config["DateColumn"]])
 
-    for index, row in n26.iterrows():
+    for index, row in data.iterrows():
         entries = functions.combine_lists(convert_transaction(row, parser_config, rules), entries)
 
     return entries

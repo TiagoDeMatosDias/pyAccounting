@@ -1,0 +1,12 @@
+{
+    "Name": "wise",
+    "DefaultCurrency": "EUR",
+    "SubAccounts": "Assets:Banks:Wise:Cash",
+    "UndefinedAccount" : "Expenses:Wise:Unregistered",
+    "input":"Files/input/Wise",
+    "DateColumn": "Date",
+    "separator": ",",
+    "RulesTable": "Files/config/private/rules_Wise.csv",
+    "RulesTable_Separator": ";"
+
+}
