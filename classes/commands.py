@@ -17,6 +17,11 @@ def command_parser(run, config):
         outputFile = run["output"]
         write_Entries(outputFile, config)
         pass
+    elif run["type"] == "wise":
+        from classes.parser_wise import write_Entries
+        outputFile = run["output"]
+        write_Entries(outputFile, config)
+        pass
     elif run["type"] == "yFinance":
         from classes.parser_yFinance import write_Entries
         write_Entries(run,config)
@@ -269,6 +274,8 @@ def command_chart(run, config):
         charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
     if type == "pieChart":
         charts.generate_pieChart(data, column_Name, value_Name, output,title, colormap )
+    if type == "lineChart":
+        charts.generate_lineChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
 
     pass
 

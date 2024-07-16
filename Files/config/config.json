@@ -6,6 +6,7 @@
     "OutputFolder": "Files/output",
     "RelativePaths": true,
     "Config_n26": "Files/config/parser_n26.json",
-    "Config_IBKR": "Files/config/parser_IBKR.json"
+    "Config_IBKR": "Files/config/parser_IBKR.json",
+    "Config_wise": "Files/config/parser_wise.json"
 
 }
