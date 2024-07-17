@@ -23,7 +23,7 @@ def command_parser(run, config):
         write_Entries(outputFile, config)
         pass
     elif run["type"] == "yFinance":
-        from classes.parser_yFinance import write_Entries
+        from classes.parser_yahooFinance import write_Entries
         write_Entries(run,config)
 
         pass
@@ -39,8 +39,8 @@ def command_merge(run, config):
     entries_1 = pandas.read_file(input_1,separator )
     entries_2 = pandas.read_file(input_2,separator )
 
-
-    entries = pd.concat( [entries_1, entries_2])
+    entries = f.combine_lists(entries_1, entries_2)
+    entries = pd.DataFrame(entries)
     entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
     pandas.write_file_entries(entries,output,separator)
     pass

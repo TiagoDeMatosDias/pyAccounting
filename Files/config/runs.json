@@ -1,16 +1,6 @@
 {
   "Runs": [
-    {
-      "output": "Files\\output\\output_parser_IBKR.csv",
-      "task": "parser",
-      "type": "IBKR",
-	  "runId":"0"
-    },{
-      "output": "Files\\output\\output_parser_n26.csv",
-      "task": "parser",
-      "type": "n26",
-	  "runId":"0"
-    },
+
     {
       "output": "Files\\output\\output_parser_wise.csv",
       "task": "parser",

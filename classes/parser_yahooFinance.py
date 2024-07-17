@@ -7,14 +7,19 @@ def get_tickerData(ticker, yticker, interval, date_min, date_max):
     if yticker == None:
         yticker = ticker
 
-    t = yf.Ticker(yticker)
-    data = yf.download(tickers=yticker, period="max", interval=interval)
-    data =  pd.DataFrame(data).reset_index()
 
-    if date_min != None:
-        data =  data.loc[(data["Date"] >= date_min)]
-    if date_max != None:
-        data =  data.loc[(data["Date"] <= date_max)]
+    t = yf.Ticker(yticker)
+
+    data = t.history(period="max", interval=interval)
+
+    data =  pd.DataFrame(data).reset_index()
+    data["Date"] = data["Date"].dt.date
+    data["Date"] = pd.to_datetime(data["Date"])
+
+    data = f.filter_data(data, "Min", "Date", date_min)
+    data = f.filter_data(data, "Max", "Date", date_max)
+
+
 
     entries = {
         "Date": data["Date"],
@@ -61,6 +66,8 @@ def write_Entries(run, config):
         pandas.write_file_entries(entries, output, CSV_Separator)
 
     except AttributeError:
-        f.log(AttributeError)
+        f.log(AttributeError.obj)
+        f.log(AttributeError.name)
+        f.log(AttributeError.args)
 
     pass

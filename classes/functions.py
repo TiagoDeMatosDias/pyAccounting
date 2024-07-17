@@ -94,7 +94,7 @@ class Functions:
     def log(logData):
         with open("log.txt", "a") as myfile:
             time = str(datetime.datetime.now())
-            log = time + ": " + str(logData)
+            log = time + ": " + str(logData) + "\n"
             myfile.write(log)
         print( log)
 
