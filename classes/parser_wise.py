@@ -18,10 +18,13 @@ def import_Entries(parserLocation):
 
     entries = []
     for inputFile in inputFiles:
+
+        #entries = pd.concat( [entries, get_entriesFromFile(inputFile, parser_config,rules)])
         entries = functions.combine_lists(get_entriesFromFile(inputFile, parser_config,rules), entries)
 
     entries = pd.DataFrame(entries)
 
+    entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
 
     return entries
 
@@ -30,7 +33,7 @@ def import_Entries(parserLocation):
 
 def get_entriesFromFile(inputFile, parser_config, rules):
     entries = []
-    data = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=[parser_config["DateColumn"]])
+    data = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=[parser_config["DateColumn"]], date_format=parser_config["DateFormat"])
 
     for index, row in data.iterrows():
         entries = functions.combine_lists(convert_transaction(row, parser_config, rules), entries)
@@ -56,7 +59,7 @@ def convert_transaction(row, parser_config, rules):
     id = "Wise_" + row["TransferWise ID"]
 
     # entry 1
-    Date.append(row["Date"])
+    Date.append(pd.to_datetime(row["Date"]).strftime(format='%Y-%m-%d'))
     Type.append("Transaction")
     ID.append(id)
     Name.append(name)
@@ -67,7 +70,7 @@ def convert_transaction(row, parser_config, rules):
     Cost_Type.append(None)
     # entry 2
     if pd.isna(row['Exchange From']) :
-        Date.append(row["Date"])
+        Date.append(pd.to_datetime(row["Date"]).strftime('%Y-%m-%d'))
         Type.append("Transaction")
         ID.append(id)
         Name.append(name)
@@ -78,7 +81,7 @@ def convert_transaction(row, parser_config, rules):
         Cost_Type.append(None)
 
     else:
-        Date.append(row["Date"])
+        Date.append(pd.to_datetime(row["Date"]).strftime('%Y-%m-%d'))
         Type.append("Transaction")
         ID.append(id)
         Name.append(name)

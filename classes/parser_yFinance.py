@@ -36,10 +36,13 @@ def get_PriceUpdates(run):
     date_min = f.get_runParameter(run ,"date_min")
     date_max = f.get_runParameter(run ,"date_max")
     entries = pd.DataFrame()
+
     for update in run["Tickers"]:
         Ticker = f.get_runParameter(update, "Ticker")
         yTicker = f.get_runParameter(update, "yTicker")
+
         updatedata = pd.DataFrame(get_tickerData(Ticker, yTicker, interval, date_min, date_max))
+
         if len(updatedata) > 0:
             entries = pd.concat([entries, updatedata], ignore_index=True)
     entries.reset_index()
@@ -49,10 +52,15 @@ def get_PriceUpdates(run):
 
 
 def write_Entries(run, config):
-    entries = get_PriceUpdates(run)
-    output = f.get_runParameter(run ,"output")
-    CSV_Separator = f.get_runParameter(config ,"CSV_Separator")
+    try:
+        entries = get_PriceUpdates(run)
+        output = f.get_runParameter(run ,"output")
+        CSV_Separator = f.get_runParameter(config ,"CSV_Separator")
 
-    import classes.pandas as pandas
-    pandas.write_file_entries(entries, output, CSV_Separator)
+        import classes.pandas as pandas
+        pandas.write_file_entries(entries, output, CSV_Separator)
+
+    except AttributeError:
+        f.log(AttributeError)
+
     pass

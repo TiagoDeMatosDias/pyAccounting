@@ -23,6 +23,7 @@ def import_Entries(parserLocation):
         entries = functions.combine_lists(entries, get_entriesFromFile(inputFile, parser_config))
 
     entries = pd.DataFrame(entries)
+    entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
 
     return entries
 

@@ -5,6 +5,7 @@
     "UndefinedAccount" : "Expenses:n26:Unregistered",
     "input":"Files/input/n26",
     "DateColumn": "Date",
+    "DateFormat": "%Y-%m-%d",
     "separator": ",",
     "RulesTable": "Files/config/private/rules_n26.csv",
     "RulesTable_Separator": ";"
