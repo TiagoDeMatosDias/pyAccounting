@@ -274,7 +274,7 @@ def command_chart(run, config):
         charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
     if type == "pieChart":
         charts.generate_pieChart(data, column_Name, value_Name, output,title, colormap )
-    if type == "lineChart":
+    if type == "stackedlineChart":
         charts.generate_stackedlineChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
 
     pass

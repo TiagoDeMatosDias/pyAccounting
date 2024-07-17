@@ -59,7 +59,7 @@ def convert_transaction(row, parser_config, rules):
     id = "Wise_" + row["TransferWise ID"]
 
     # entry 1
-    Date.append(pd.to_datetime(row["Date"]).strftime(format='%Y-%m-%d'))
+    Date.append(pd.to_datetime(row["Date"], format=parser_config['DateFormat']))
     Type.append("Transaction")
     ID.append(id)
     Name.append(name)
@@ -70,7 +70,7 @@ def convert_transaction(row, parser_config, rules):
     Cost_Type.append(None)
     # entry 2
     if pd.isna(row['Exchange From']) :
-        Date.append(pd.to_datetime(row["Date"]).strftime('%Y-%m-%d'))
+        Date.append(pd.to_datetime(row["Date"], format=parser_config['DateFormat']))
         Type.append("Transaction")
         ID.append(id)
         Name.append(name)
@@ -81,7 +81,7 @@ def convert_transaction(row, parser_config, rules):
         Cost_Type.append(None)
 
     else:
-        Date.append(pd.to_datetime(row["Date"]).strftime('%Y-%m-%d'))
+        Date.append(pd.to_datetime(row["Date"], format=parser_config['DateFormat']))
         Type.append("Transaction")
         ID.append(id)
         Name.append(name)

@@ -5,7 +5,7 @@
     "UndefinedAccount" : "Expenses:Wise:Unregistered",
     "input":"Files/input/Wise",
     "DateColumn": "Date",
-    "DateFormat": "%Y-%m-%d",
+    "DateFormat": "%d-%m-%Y",
     "separator": ",",
     "RulesTable": "Files/config/private/rules_Wise.csv",
     "RulesTable_Separator": ";"
