@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "Name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DefaultCurrency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "SubAccounts": {
+      "type": "string",
+      "minLength": 1
+    },
+    "UndefinedAccount": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DateColumn": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DateFormat": {
+      "type": "string",
+      "minLength": 1
+    },
+    "separator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RulesTable": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RulesTable_Separator": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "Name",
+    "DefaultCurrency",
+    "SubAccounts",
+    "UndefinedAccount",
+    "input",
+    "DateColumn",
+    "DateFormat",
+    "separator",
+    "RulesTable",
+    "RulesTable_Separator"
+  ]
+}

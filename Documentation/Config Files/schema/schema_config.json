@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "CSV_Separator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Runs": {
+      "type": "string",
+      "minLength": 1
+    },
+    "InputFolder": {
+      "type": "string",
+      "minLength": 1
+    },
+    "OutputFolder": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RelativePaths": {
+      "type": "boolean"
+    },
+    "Config_n26": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Config_IBKR": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Config_wise": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "CSV_Separator",
+    "Runs",
+    "InputFolder",
+    "OutputFolder",
+    "RelativePaths",
+    "Config_n26",
+    "Config_IBKR",
+    "Config_wise"
+  ]
+}

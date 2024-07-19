@@ -1,7 +1,0 @@
-{
-    "Name": "IBKR",
-    "DefaultCurrency": "Eur",
-    "SubAccounts": "Investment",
-    "input":"Files/input/IBKR",
-    "AccountSeparator": ":"
-}
