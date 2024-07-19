@@ -47,7 +47,6 @@ def get_PriceUpdates(run):
         yTicker = f.get_runParameter(update, "yTicker")
 
         updatedata = pd.DataFrame(get_tickerData(Ticker, yTicker, interval, date_min, date_max))
-
         if len(updatedata) > 0:
             entries = pd.concat([entries, updatedata], ignore_index=True)
     entries.reset_index()

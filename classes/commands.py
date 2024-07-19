@@ -30,19 +30,44 @@ def command_parser(run, config):
     pass
 
 def command_merge(run, config):
-    entries = []
-    input_1 = run["input_1"]
-    input_2 = run["input_2"]
-    output = run["output"]
+
+    # We get the initial parameters, including the separator and the input and output location
+    inputs = f.get_runParameter(run, "inputs")
+    output = f.get_runParameter(run,"output")
     separator = config["CSV_Separator"]
 
-    entries_1 = pandas.read_file(input_1,separator )
-    entries_2 = pandas.read_file(input_2,separator )
 
-    entries = f.combine_lists(entries_1, entries_2)
+    # We combine the data
+    entries = []
+    for input in inputs:
+        # We get the data
+        data = pandas.read_file(f.get_runParameter(input,"input"), separator)
+        entries = f.combine_lists(entries, data)
+
+    # We sort it by Date
     entries = pd.DataFrame(entries)
     entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
+
+    # We write the output to a file
     pandas.write_file_entries(entries,output,separator)
+    pass
+
+def command_filter(run, config):
+    # We get the initial parameters, including the separator and the input and output location
+    input = f.get_runParameter( run,"input")
+    output = f.get_runParameter( run,"output")
+    separator = config["CSV_Separator"]
+
+    # We get the data
+    data = pandas.read_file(input,separator )
+
+
+    # We get the filter rules and adjust our input data accordingly
+    filters = f.get_runParameter(run, "filters")
+    data = f.run_filters(data,filters )
+
+    # We write the output to a file
+    pandas.write_file_entries(data,output,separator)
     pass
 
 def command_benchmark(run, config):
@@ -272,10 +297,14 @@ def command_chart(run, config):
     # we call the relevant charting function
     if type == "stackedBar":
         charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
+    if type == "Bar":
+        charts.generate_BarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
     if type == "pieChart":
         charts.generate_pieChart(data, column_Name, value_Name, output,title, colormap )
     if type == "stackedlineChart":
         charts.generate_stackedlineChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
+    if type == "lineChart":
+        charts.generate_lineChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
 
     pass
 
@@ -298,6 +327,9 @@ class Commands:
             pass
         elif run["task"] == "chart":
             command_chart(run, config)
+            pass
+        elif run["task"] == "filter":
+            command_filter(run, config)
             pass
         else:
             f.log("Other Command")

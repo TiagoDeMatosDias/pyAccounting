@@ -65,6 +65,46 @@ def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLo
      fig.savefig(SaveLocation)
      plt.close(fig)
 
+def generate_BarChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap,max_legend_entries, rounding):
+
+     # Pivot the dataframe
+     data_pivot = data.pivot_table(index=Index_Name, columns=Columns_Name, values=Values_Name, aggfunc="sum").fillna(0)
+
+     # Create a larger figure
+     fig, ax = plt.subplots(figsize=(20, 15))
+
+     # Create a stacked bar chart
+     data_pivot.plot(
+          kind='bar',
+          stacked=False,
+          ax=ax,
+          label='Inline label'
+     )
+
+     # Customize the plot
+     ax.set_title(Title )
+     ax.set_xlabel(Index_Name)
+     ax.set_ylabel(Values_Name)
+     ax = get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name)
+
+
+     for bar in ax.patches:
+          height = bar.get_height()
+          width = bar.get_width()
+          x = bar.get_x()
+          y = bar.get_y()
+          label_text = round(height, rounding )
+          label_x = round( x + width / 2 , rounding)
+          label_y = round(y + height / 2, rounding)
+          ax.text(label_x, label_y, label_text, ha='center',
+                  va='center')
+
+     data_pivot.plot(colormap=colormap)
+
+     # Save the plot to a file
+     fig.savefig(SaveLocation)
+     plt.close(fig)
+
 
 
 def generate_stackedlineChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap,max_legend_entries, rounding):
@@ -107,6 +147,46 @@ def generate_stackedlineChart(data, Index_Name, Columns_Name, Values_Name, SaveL
      fig.savefig(SaveLocation)
      plt.close(fig)
 
+
+def generate_lineChart(data, Index_Name, Columns_Name, Values_Name, SaveLocation, Title, colormap,max_legend_entries, rounding):
+
+     # Pivot the dataframe
+     data_pivot = data.pivot_table(index=Index_Name, columns=Columns_Name, values=Values_Name, aggfunc="sum").fillna(0)
+
+     # Create a larger figure
+     fig, ax = plt.subplots(figsize=(20, 15))
+
+     # Create a stacked bar chart
+     data_pivot.plot(
+          kind='line',
+          stacked=False,
+          ax=ax,
+          label='Inline label'
+     )
+
+     # Customize the plot
+     ax.set_title(Title )
+     ax.set_xlabel(Index_Name)
+     ax.set_ylabel(Values_Name)
+     ax = get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name)
+
+
+     for bar in ax.patches:
+          height = bar.get_height()
+          width = bar.get_width()
+          x = bar.get_x()
+          y = bar.get_y()
+          label_text = round(height, rounding )
+          label_x = round( x + width / 2 , rounding)
+          label_y = round(y + height / 2, rounding)
+          ax.text(label_x, label_y, label_text, ha='center',
+                  va='center')
+
+     data_pivot.plot(colormap=colormap)
+
+     # Save the plot to a file
+     fig.savefig(SaveLocation)
+     plt.close(fig)
 
 def get_cappedHandlesandLabels(ax, data_pivot, max_legend_entries, Columns_Name ):
      # Customize the legend to show up to max_legend_entries entries

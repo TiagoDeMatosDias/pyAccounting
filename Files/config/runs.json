@@ -1,81 +1,135 @@
 {
   "Runs": [
+	{
+      "output": "Files\\output\\output_merged.csv",
+      "inputs": [
+        {"input": "Files\\input\\Adjustments.csv"},
+        {"input": "Files\\output\\output_parser_n26.csv"},
+        {"input": "Files\\output\\output_parser_IBKR.csv"},
+        {"input": "Files\\output\\output_parser_wise.csv"},
+        {"input": "Files\\output\\output_parser_yFinance.csv"}
+      ],
+      "task": "merge",
+	  "runId":"1"
+    },
     {
-      "output": "Files\\output\\output_5_RunningTotal_w_group.csv",
+      "output": "Files\\output\\output_2_benchmark.csv",
+	  "input": "Files\\output\\output_merged.csv",
+      "task": "benchmark",
+	  "benchmark": "Assets:Transfers:IBKR",
+      "benchmarkAccountId": "IBKR_",
+      "maxDepth": 5,
+	  "benchmarkTicker": "VWCE",
+	  "runId":"1"
+    },
+    {
+      "output": "Files\\output\\output_Investment.csv",
       "input": "Files\\output\\output_2_benchmark.csv",
+      "task": "filter",
+      "filters": [
+        {
+          "type": "Max",
+          "column": "Date",
+          "value": "2024-07-17"
+        },
+        {
+          "type": "Contains",
+          "column": "Account",
+          "value": "Assets:Investment"
+        }
+      ],
+	  "runId":"3"
+    },
+    {
+      "output": "Files\\output\\output_Benchmark.csv",
+      "input": "Files\\output\\output_2_benchmark.csv",
+      "task": "filter",
+      "filters": [
+        {
+          "type": "Max",
+          "column": "Date",
+          "value": "2024-07-17"
+        },
+        {
+          "type": "Contains",
+          "column": "Account",
+          "value": "Benchmark"
+        }
+      ],
+	  "runId":"3"
+    },
+    {
+      "output": "Files\\output\\output_Prices.csv",
+      "input": "Files\\output\\output_2_benchmark.csv",
+      "task": "filter",
+      "filters": [
+        {
+          "type": "Max",
+          "column": "Date",
+          "value": "2024-07-17"
+        },
+        {
+          "type": "Equals",
+          "column": "Type",
+          "value": "PriceUpdate"
+        }
+      ],
+	  "runId":"3"
+    },
+	{
+      "output": "Files\\output\\output_InvestmentvsBenchmark.csv",
+      "inputs": [
+        {"input": "Files\\output\\output_Benchmark.csv"},
+        {"input": "Files\\output\\output_Investment.csv"},
+        {"input": "Files\\output\\output_Prices.csv"}
+                ],
+      "task": "merge",
+	  "runId":"1"
+    },
+    {
+      "output": "Files\\output\\output_InvestmentvsBenchmark_wk_noGroup.csv",
+      "input": "Files\\output\\output_InvestmentvsBenchmark.csv",
+      "task": "runningTotal",
+      "increment": "W",
+      "fairValueCurrency": "EUR",
+      "groupTypes": false,
+      "filters": [
+        {
+          "type": "Min",
+          "column": "Date",
+          "value": "2020-09-01"
+        }
+      ],
+	  "runId":"5"
+    },
+    {
+      "output": "Files\\output\\output_InvestmentvsBenchmark_wk.csv",
+      "input": "Files\\output\\output_InvestmentvsBenchmark.csv",
       "task": "runningTotal",
       "increment": "W",
       "fairValueCurrency": "EUR",
       "groupTypes": true,
       "filters": [
         {
-          "type": "Max",
+          "type": "Min",
           "column": "Date",
-          "value": "2024-09-01"
+          "value": "2020-09-01"
         }
       ],
 	  "runId":"5"
     },
     {
-      "input": "Files/output/output_5_RunningTotal_w_group.csv",
+      "input": "Files/output/output_InvestmentvsBenchmark_wk.csv",
       "task": "chart",
-      "type": "stackedlineChart",
-      "output": "Files/output/chart_09.png",
+      "type": "lineChart",
+      "output": "Files/output/chart_13.png",
       "index_Name":"Date",
       "column_Name":"Account",
       "value_Name":"RunningTotal_FairValue",
       "colormap": "tab10",
-      "title": "Benchmark on a Weekly Basis",
+      "title": "Assets on a Weekly Basis since beginning",
       "max_legend_entries": 10,
-      "invert": true,
-      "filters": [
-        {
-          "type": "Min",
-          "column": "Date",
-          "value": "2020-06-06"
-        },
-        {
-          "type": "Contains",
-          "column": "Account",
-          "value": "Benchmark"
-        },
-        {
-          "type": "Min",
-          "column": "RunningTotal_FairValue",
-          "value": 0.00
-        }
-      ],
-	  "runId":"0"
-    },
-    {
-      "input": "Files/output/output_5_RunningTotal_w_group.csv",
-      "task": "chart",
-      "type": "stackedlineChart",
-      "output": "Files/output/chart_10.png",
-      "index_Name":"Date",
-      "column_Name":"Account",
-      "value_Name":"RunningTotal_FairValue",
-      "colormap": "tab10",
-      "title": "Benchmark on a Weekly Basis",
-      "max_legend_entries": 10,
-      "invert": true,
-      "filters": [
-        {
-          "type": "Min",
-          "column": "Date",
-          "value": "2020-06-06"
-        },
-        {
-          "type": "Contains",
-          "column": "Account",
-          "value": "Assets:"
-        },
-        {
-          "type": "Min",
-          "column": "RunningTotal_FairValue",
-          "value": 0.00
-        }
-      ],
+      "invert": false,
 	  "runId":"0"
     }
   ]

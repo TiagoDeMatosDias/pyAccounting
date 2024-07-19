@@ -18,8 +18,6 @@ def import_Entries(parserLocation):
 
     entries = []
     for inputFile in inputFiles:
-
-        #entries = pd.concat( [entries, get_entriesFromFile(inputFile, parser_config,rules)])
         entries = functions.combine_lists(get_entriesFromFile(inputFile, parser_config,rules), entries)
 
     entries = pd.DataFrame(entries)

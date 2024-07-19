@@ -18,8 +18,6 @@ def import_Entries(parserLocation):
 
     entries = []
     for inputFile in inputFiles:
-        #entries = pd.concat( [entries, get_entriesFromFile(inputFile, parser_config,rules)], ignore_index=True)
-
         entries = functions.combine_lists(get_entriesFromFile(inputFile, parser_config,rules), entries)
 
     entries = pd.DataFrame(entries)
@@ -36,8 +34,6 @@ def get_entriesFromFile(inputFile, parser_config, rules):
     n26 = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=[parser_config["DateColumn"]], date_format=parser_config["DateFormat"])
 
     for index, row in n26.iterrows():
-        #entries = pd.concat( [entries, get_entriesFromFile(row, parser_config,rules)], ignore_index=True)
-
         entries = functions.combine_lists(convert_transaction(row, parser_config, rules), entries)
 
     return entries

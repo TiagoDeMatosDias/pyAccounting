@@ -109,6 +109,9 @@ class Functions:
         return output
 
     def run_filters(data, filters):
+        if filters == None:
+            return  data
+
         filtered_data = data
         for filter in filters:
             type = Functions.get_runParameter(filter, "type")
