@@ -1,11 +1,12 @@
 from classes.functions import Functions as functions
 from decimal import Decimal
 import pandas as pd
+import classes.pandas as pandas
 
 
-def write_Entries(output, config):
+def write_Entries(run, config):
+    output = functions.get_runParameter(run, "output")
     entries = import_Entries(config["Config_wise"])
-    import classes.pandas as pandas
     pandas.write_file_entries(entries, output, config["CSV_Separator"])
     pass
 
@@ -14,16 +15,21 @@ def import_Entries(parserLocation):
     inputfiles = parser_config["input"]
     inputFolder = functions.get_full_Path(inputfiles)
     inputFiles = functions.get_ListFilesInDir(inputFolder)
-    rules = pd.read_csv(filepath_or_buffer=parser_config['RulesTable'], sep=parser_config['RulesTable_Separator'])
+    try:
+        rules = pd.read_csv(filepath_or_buffer=parser_config['RulesTable'], sep=parser_config['RulesTable_Separator'])
+    except:
+        functions.log("No rules available at " + parser_config['RulesTable'])
+        return pd.DataFrame()
 
     entries = []
     for inputFile in inputFiles:
         entries = functions.combine_lists(get_entriesFromFile(inputFile, parser_config,rules), entries)
 
     entries = pd.DataFrame(entries)
-
-    entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
-
+    try:
+        entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
+    except:
+        functions.log("Unable to sort values for Wise entries")
     return entries
 
     pass

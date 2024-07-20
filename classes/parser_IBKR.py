@@ -1,11 +1,13 @@
 from classes.functions import Functions as functions
 from decimal import Decimal
 import pandas as pd
+import classes.pandas as pandas
+
 
 ## This function receives an output file path (relative path) and writes the entries for that parser in the location
-def write_Entries(output, config):
+def write_Entries(run, config):
+    output = functions.get_runParameter(run, "output")
     entries = import_Entries(config["Config_IBKR"])
-    import classes.pandas as pandas
     pandas.write_file_entries(entries, output, config["CSV_Separator"])
 
     pass
@@ -23,8 +25,11 @@ def import_Entries(parserLocation):
         entries = functions.combine_lists(entries, get_entriesFromFile(inputFile, parser_config))
 
     entries = pd.DataFrame(entries)
-    entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
-
+    try:
+        entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
+    except:
+        functions.log("Unable to sort values for Wise entries")
+    return entries
     return entries
 
 ## This function reads the IBKR XML file and returns a list of every XML object

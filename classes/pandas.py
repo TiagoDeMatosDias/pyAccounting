@@ -1,16 +1,23 @@
 import pandas as pd
 from classes.functions import Functions as f
 
-def read_file(filepath, separator):
+def read_file(filepath, separator) -> pd.DataFrame:
     try:
         entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator, parse_dates=["Date"], date_format="%Y-%m-%d")
     except:
-        entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator)
+        try:
+            entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator)
+        except:
+            f.log("Failed to open " + filepath)
+            entries = pd.DataFrame()
     return entries
 
 def write_file_entries(entries, output, separator):
     outputfile = f.get_full_Path(output)
-    entries.to_csv(outputfile, sep=separator, index=False, mode="w", header=True,columns=["Date","Type","ID","Name","Account","Quantity","Quantity_Type","Cost","Cost_Type"])
+    if entries.size == 0:
+        f.log("No entries to write to file")
+    else:
+        entries.to_csv(outputfile, sep=separator, index=False, mode="w", header=True,columns=["Date","Type","ID","Name","Account","Quantity","Quantity_Type","Cost","Cost_Type"])
     pass
 
 def write_file_balance(entries, output, separator):

@@ -1,24 +1,24 @@
 {
   "Runs": [
 	 {
-      "output": "Files\\output\\output_parser_IBKR.csv",
+      "output": "Files/output/output_parser_IBKR.csv",
       "task": "parser",
       "type": "IBKR",
 	  "runId":"0"
     },{
-      "output": "Files\\output\\output_parser_n26.csv",
+      "output": "Files/output/output_parser_n26.csv",
       "task": "parser",
       "type": "n26",
 	  "runId":"0"
     },
     {
-      "output": "Files\\output\\output_parser_wise.csv",
+      "output": "Files/output/output_parser_wise.csv",
       "task": "parser",
       "type": "wise",
 	  "runId":"0"
     },
     {
-     "output": "Files\\output\\output_parser_yFinance.csv",
+     "output": "Files/output/output_parser_yFinance.csv",
       "task": "parser",
       "type": "yFinance",
       "interval": "1wk",
@@ -98,20 +98,20 @@
       ]
     },
     {
-      "output": "Files\\output\\output_merged.csv",
+      "output": "Files/output/output_merged.csv",
       "inputs": [
-        {"input": "Files\\input\\Adjustments.csv"},
-        {"input": "Files\\output\\output_parser_n26.csv"},
-        {"input": "Files\\output\\output_parser_IBKR.csv"},
-        {"input": "Files\\output\\output_parser_wise.csv"},
-        {"input": "Files\\output\\output_parser_yFinance.csv"}
+        {"input": "Files/input/Adjustments.csv"},
+        {"input": "Files/output/output_parser_n26.csv"},
+        {"input": "Files/output/output_parser_IBKR.csv"},
+        {"input": "Files/output/output_parser_wise.csv"},
+        {"input": "Files/output/output_parser_yFinance.csv"}
       ],
       "task": "merge",
 	  "runId":"1"
     },
     {
-      "output": "Files\\output\\output_2_benchmark.csv",
-	  "input": "Files\\output\\output_merged.csv",
+      "output": "Files/output/output_2_benchmark.csv",
+	  "input": "Files/output/output_merged.csv",
       "task": "benchmark",
 	  "benchmark": "Assets:Transfers:IBKR",
       "benchmarkAccountId": "IBKR_",
@@ -120,8 +120,8 @@
 	  "runId":"1"
     },
     {
-      "output": "Files\\output\\output_Investment.csv",
-      "input": "Files\\output\\output_2_benchmark.csv",
+      "output": "Files/output/output_Investment.csv",
+      "input": "Files/output/output_2_benchmark.csv",
       "task": "filter",
       "filters": [
         {
@@ -138,8 +138,8 @@
 	  "runId":"3"
     },
     {
-      "output": "Files\\output\\output_Benchmark.csv",
-      "input": "Files\\output\\output_2_benchmark.csv",
+      "output": "Files/output/output_Benchmark.csv",
+      "input": "Files/output/output_2_benchmark.csv",
       "task": "filter",
       "filters": [
         {
@@ -156,18 +156,18 @@
 	  "runId":"3"
     },
 	{
-      "output": "Files\\output\\output_InvestmentvsBenchmark.csv",
+      "output": "Files/output/output_InvestmentvsBenchmark.csv",
       "inputs": [
-        {"input": "Files\\output\\output_Benchmark.csv"},
-        {"input": "Files\\output\\output_Investment.csv"},
-        {"input": "Files\\output\\output_parser_yFinance.csv"}
+        {"input": "Files/output/output_Benchmark.csv"},
+        {"input": "Files/output/output_Investment.csv"},
+        {"input": "Files/output/output_parser_yFinance.csv"}
                 ],
       "task": "merge",
 	  "runId":"1"
     },
     {
-      "output": "Files\\output\\output_InvestmentvsBenchmark_wk_noGroup.csv",
-      "input": "Files\\output\\output_InvestmentvsBenchmark.csv",
+      "output": "Files/output/output_InvestmentvsBenchmark_wk_noGroup.csv",
+      "input": "Files/output/output_InvestmentvsBenchmark.csv",
       "task": "runningTotal",
       "increment": "W",
       "fairValueCurrency": "EUR",
@@ -182,8 +182,8 @@
 	  "runId":"5"
     },
     {
-      "output": "Files\\output\\output_InvestmentvsBenchmark_wk.csv",
-      "input": "Files\\output\\output_InvestmentvsBenchmark.csv",
+      "output": "Files/output/output_InvestmentvsBenchmark_wk.csv",
+      "input": "Files/output/output_InvestmentvsBenchmark.csv",
       "task": "runningTotal",
       "increment": "W",
       "fairValueCurrency": "EUR",
