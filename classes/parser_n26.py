@@ -1,3 +1,5 @@
+import random
+
 from classes.functions import Functions as functions
 from decimal import Decimal
 import pandas as pd
@@ -59,10 +61,10 @@ def convert_transaction(row, parser_config, rules):
     Cost_Type = []
 
     account_subAccount = parser_config["SubAccounts"]
-    name = str(str(row["Payee"]) + "_" + str(row["Account number"]) + str(row["Payment reference"]) ).replace(" ", "")
+    name = str(str(row["Payee"]) + "_" + str(row["Account number"]) + str(row["Payment reference"]) ).replace(" ", "").replace(",", "").upper()
 
     account = get_Account(name, parser_config, rules)
-    id = "N26_" + str(functions.generate_unique_uuid)
+    id = "N26_" + str(random.randrange(0,99999999999999))
 
 
     # entry 1
@@ -107,9 +109,9 @@ def convert_transaction(row, parser_config, rules):
 def get_Account(name, parser_config, rules):
     out = parser_config['UndefinedAccount']
     for index, row, in rules.iterrows():
-        if row["Source"] in name:
+        if row["Source"].upper() in name:
             if row["Exact"] == True:
-                if row["Source"] == name:
+                if row["Source"].upper() == name:
                     out = row["Account"]
                     return out
             else:

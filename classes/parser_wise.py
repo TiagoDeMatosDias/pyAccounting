@@ -57,7 +57,8 @@ def convert_transaction(row, parser_config, rules):
     Cost_Type = []
 
     account_subAccount = parser_config["SubAccounts"]
-    name = str(str(row["Description"])).replace(" ", "")
+    name = str(str(row["Description"])).replace(" ", "").replace(",", "").upper()
+
 
     account = get_Account(name, parser_config, rules)
     id = "Wise_" + row["TransferWise ID"]
@@ -115,9 +116,9 @@ def convert_transaction(row, parser_config, rules):
 def get_Account(name, parser_config, rules):
     out = parser_config['UndefinedAccount']
     for index, row, in rules.iterrows():
-        if row["Source"] in name:
+        if row["Source"].upper() in name:
             if row["Exact"] == True:
-                if row["Source"] == name:
+                if row["Source"].upper() == name:
                     out = row["Account"]
                     return out
             else:

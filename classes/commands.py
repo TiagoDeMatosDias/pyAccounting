@@ -35,5 +35,8 @@ class Commands:
         elif run["task"] == "filter":
             d.command_filter(run, config)
             pass
+        elif run["task"] == "validate":
+            d.command_validate(run, config)
+            pass
         else:
             f.log("Other Command")

@@ -1,3 +1,4 @@
+import random
 
 import pandas as pd
 from decimal import Decimal
@@ -64,7 +65,38 @@ def command_filter(run, config):
     # We write the output to a file
     pandas.write_file_entries(data, output, separator)
 
+def command_validate(run,config):
+    # We get the initial parameters, including the separator and the input and output location
+    input = f.get_runParameter(run, "input")
+    output = f.get_runParameter(run, "output")
+    separator = config["CSV_Separator"]
 
+
+    # We get the data
+    data = pandas.read_file(input, separator)
+
+    # We get only the transactions
+    transactions = f.filter_data(data, "Equals", "Type", "Transaction")
+
+    # for every unique transaction, we check if it balances out
+
+    id=[]
+    result=[]
+    for transaction_ID in data["ID"].unique():
+        Valid = pandas.validate_Transaction(f.filter_data(data, "Equals", "ID", transaction_ID))
+        id.append(transaction_ID)
+        result.append(Valid)
+
+    results = {
+        "Transaction ID": id,
+        "Result": result,
+    }
+
+    results = pd.DataFrame(results)
+
+    pandas.write_file_balance(results, output, separator)
+
+    pass
 
 
 def command_benchmark(run, config):
@@ -95,7 +127,7 @@ def command_benchmark(run, config):
         benchmarkEntry = pd.DataFrame( [{
             "Date": date,
             "Type": "Benchmark",
-            "ID": "Benchmark_" + str(f.generate_unique_uuid),
+            "ID": "Benchmark_" +  str(random.randrange(0,99999999999999)),
             "Name": benchmarkTicker,
             "Account": "Benchmark",
             "Quantity": Decimal( quantity).copy_negate(),

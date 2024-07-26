@@ -43,3 +43,36 @@ def get_dateFrame(Start, End, Frequency):
 def get_uniqueFrame(entries, column):
     unique = entries[column].unique()
     return pd.DataFrame({column: unique})
+
+
+def validate_Transaction(data: pd.DataFrame) -> bool:
+    data = f.filter_data(data, "Equals", "Type", "Transaction")
+
+    if len(data["Quantity_Type"].unique()) == 1:
+        if round(data["Quantity"].sum(), 5) == 0.0:
+            return True
+        else:
+            return False
+    else:
+        qt_val = {}
+        invalid = {}
+        for quantity_type in data["Quantity_Type"].unique():
+            qt_data = f.filter_data(data, "Equals", "Quantity_Type", quantity_type)
+            qt_val[quantity_type] = qt_data["Quantity"].sum()
+            if qt_val[quantity_type] != 0.00:
+                invalid.update({quantity_type: qt_val[quantity_type]})
+
+        for q_t in invalid:
+            qt_data = f.filter_data(data, "Equals", "Cost_Type", q_t)
+            for index, row in qt_data.iterrows():
+                invalid[q_t] = invalid[q_t] + row["Cost"]
+                invalid[row["Quantity_Type"]] = invalid[row["Quantity_Type"]] - row["Quantity"]
+
+        out = True
+
+        for q_t in invalid:
+            invalid[q_t] = round(invalid[q_t], 5)
+            if invalid[q_t] != 0.0:
+                out = False
+
+    return out
