@@ -99,6 +99,7 @@ def command_validate(run,config):
     pass
 
 
+
 def command_benchmark(run, config):
     # We get the initial parameters, including the separator and the input and output location
     separator = config["CSV_Separator"]

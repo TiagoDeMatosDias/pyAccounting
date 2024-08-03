@@ -88,8 +88,6 @@ class Functions:
 
 
 
-    def generate_unique_uuid( self):
-       return str(uuid.uuid4())
 
     def log(logData):
         with open("log.txt", "a") as myfile:

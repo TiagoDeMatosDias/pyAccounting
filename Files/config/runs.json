@@ -1,10 +1,5 @@
 {
   "Runs": [
-	 {
-      "output": "Files/output/Validation.csv",
-      "input": "Files/output/output_merged.csv",
-      "task": "validate",
-	  "runId":"0"
-    }
+
   ]
 }
