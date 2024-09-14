@@ -183,7 +183,7 @@ def command_balance(run, config):
 
 
     # We get the cross join frame
-    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_uniqueFrame(data, "Account"),     pandas.get_uniqueFrame(data, "Quantity_Type"))
+    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_uniqueFrame(data, "Account"), pandas.get_uniqueFrame(data, "Quantity_Type"))
     runningTotalFrame = runningTotalFrame.dropna(subset=["Account", "Quantity_Type"])
 
     # We get the data for the frame and do the sum
@@ -237,216 +237,264 @@ def command_balance(run, config):
 
 
 
-
 def command_runningTotal(run, config):
-    # We get the initial parameters, including the separator and the input and output location
+    """
+    Generates a running total report based on transaction and benchmark data.
+
+    This function performs the following steps:
+    1. Retrieves configuration settings and parameters such as file paths, increment frequency, fair value currency, and grouping options.
+    2. Reads input data from a CSV file and extracts relevant transaction and benchmark data.
+    3. Merges the transaction and benchmark data into a single DataFrame.
+    4. Applies any specified filters to the data.
+    5. Constructs a DataFrame to hold running totals by performing a cross join of dates, accounts, and quantity types.
+    6. Calculates the quantity changes and running totals, then computes cumulative sums.
+    7. Optionally, if a fair value currency is specified, calculates the fair value of the running totals and changes based on up-to-date prices.
+    8. Produces a final output DataFrame, which may aggregate results based on the groupTypes parameter.
+    9. Writes the resulting DataFrame to a CSV file.
+
+    Parameters:
+    - run (dict): Contains runtime parameters including input and output file paths, and other configuration settings.
+    - config (dict): Contains configuration settings such as CSV separator.
+
+    Notes:
+    - The function uses `pandas` for data manipulation and `f` (assumed to be a utility module) for additional data processing tasks.
+    - The fair value calculation is conditional based on whether a valid currency is provided.
+    - Results can be grouped by account if `groupTypes` is set to True.
+
+    """
+
+    # Extract configuration parameters
     separator = config["CSV_Separator"]
-    input = f.get_full_Path(run["input"])
-    output = f.get_full_Path(run["output"])
+    input_path = f.get_full_Path(run["input"])
+    output_path = f.get_full_Path(run["output"])
     increment = f.get_runParameter(run, "increment")
     fairValueCurrency = f.get_runParameter(run, "fairValueCurrency")
     groupTypes = f.get_runParameter(run, "groupTypes")
 
-    # We read the data
-    e = pandas.read_file(input,separator )
+    # Log the start of the process
+    f.log(f"Starting running total calculation with parameters: separator={separator}, input={input_path}, output={output_path}, increment={increment}, fairValueCurrency={fairValueCurrency}, groupTypes={groupTypes}")
 
-    # We get only the price updates
-    PriceChanges = f.get_priceUpdates(e)
+    # Read the data
+    data = pandas.read_file(input_path, separator)
 
-    # We get only the transactions
-    #data = f.get_transactions(e)
-    data = e
+    # Extract price updates and transactions
+    PriceChanges = f.get_priceUpdates(data)
+    transactions = f.get_transactions(data)
+    benchmark = f.get_benchmark(data)
 
-    # We get the filter rules and adjust our input data accordingly
+    # Combine transactions and benchmark into a single DataFrame
+    data_combined = pd.concat([transactions, benchmark], ignore_index=True)
+
+    # Apply filters to the data
     filters = f.get_runParameter(run, "filters")
-    data = f.run_filters(data,filters )
+    data_filtered = f.run_filters(data_combined, filters)
 
-    # We define the start and end date
-    startDate = data["Date"].min()
-    endDate = data["Date"].max()
+    # Define the start and end dates
+    startDate = data_filtered["Date"].min()
+    endDate = data_filtered["Date"].max()
 
-    # We cross join the frames to get the Date, Account, Quantity_Type index
-    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_dateFrame(startDate, endDate, increment),
-                                                     pandas.get_uniqueFrame(data, "Account"))
+    # Generate the date, account, and quantity_type combinations for the running total
+    runningTotalFrame = pandas.get_crossJoinedFrames(
+        pandas.get_dateFrame(startDate, endDate, increment),
+        pandas.get_uniqueFrame(data_filtered, "Account")
+    )
+    runningTotalFrame = pandas.get_crossJoinedFrames(
+        runningTotalFrame,
+        pandas.get_uniqueFrame(data_filtered, "Quantity_Type")
+    )
 
-    runningTotalFrame = pandas.get_crossJoinedFrames(runningTotalFrame,
-                                                     pandas.get_uniqueFrame(data, "Quantity_Type"))
-
-    # We drop the empty subsets
+    # Drop rows with missing required information
     runningTotalFrame = runningTotalFrame.dropna(subset=["Account", "Date", "Quantity_Type"])
 
-    # We get the changes and cumulative sum
-    change = data.groupby(by=[pd.Grouper(key='Date', freq=increment), "Account", "Quantity_Type"])["Quantity"].sum()
+    # Calculate changes and cumulative sums
+    change = data_filtered.groupby(by=[pd.Grouper(key='Date', freq=increment), "Account", "Quantity_Type"])["Quantity"].sum()
     result = runningTotalFrame.merge(change, how="left", on=["Date", "Account", "Quantity_Type"])
     result = result.fillna(0)
     result = pandas.get_cumulativesum(result)
 
+    # Check if fair value calculation is required
+    if fairValueCurrency:  # fairValueCurrency should be either a string or None
+        # Generate price table
+        UniquePriceCombo = pandas.get_crossJoinedFrames(
+            pandas.get_dateFrame(startDate, endDate, increment),
+            pandas.get_uniqueFrame(result, "Quantity_Type")
+        )
+        UniquePriceCombo["Price"] = UniquePriceCombo.apply(
+            lambda x: f.get_LatestPrice(PriceChanges, x["Date"], x["Quantity_Type"], fairValueCurrency, 0, 5),
+            axis=1
+        )
 
-
-    # We check if we want the fair value
-    if fairValueCurrency != None:
-        # We generate a table with the prices by period
-        UniquePriceCombo = pandas.get_crossJoinedFrames(pandas.get_dateFrame(startDate, endDate, increment), pandas.get_uniqueFrame(result, "Quantity_Type"))
-        UniquePriceCombo["Price"] = UniquePriceCombo.apply( lambda x: f.get_LatestPrice(PriceChanges, x["Date"], x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
-
-        # We merge the price table into the overall table, and multiply the quantity by the price to get the fair value
+        # Merge price table with the result and compute fair values
         result = result.merge(UniquePriceCombo, on=["Date", "Quantity_Type"], how="inner")
-        result["RunningTotal_FairValue"] = result.apply( lambda x: x["RunningTotal"] * x["Price"], axis=1)
-        result["Change_FairValue"] = result.apply( lambda x: x["Quantity"] * x["Price"], axis=1)
+        result["RunningTotal_FairValue"] = result["RunningTotal"] * result["Price"]
+        result["Change_FairValue"] = result["Quantity"] * result["Price"]
 
-        # We generate the output
+        # Prepare output with fair value
         outputList = result[
-            ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "Change_FairValue", "RunningTotal_FairValue"]].rename(
-            columns={
-                "Quantity": "Change"
-            })
+            ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal", "Price", "Change_FairValue", "RunningTotal_FairValue"]
+        ].rename(columns={"Quantity": "Change"})
 
-        #We determine if we want to group the types into a single one
-        if groupTypes == True:
+        # Group types if required
+        if groupTypes:
             outputList = outputList[["Date", "Account", "Change_FairValue", "RunningTotal_FairValue"]]
-            outputList = outputList.groupby(["Date","Account"]).sum().reset_index()
+            outputList = outputList.groupby(["Date", "Account"]).sum().reset_index()
 
-    #If we don't want the fair value then we get just the change
     else:
+        # Prepare output without fair value
+        outputList = result[
+            ["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal"]
+        ].rename(columns={"Quantity": "Change"})
 
-        outputList = result[["Date", "Account", "Quantity_Type", "Quantity", "RunningTotal"]].rename(
-        columns={
-            "Quantity": "Change"
-        } )
+    # Write the output to a file
+    pandas.write_file_balance(outputList, output_path, separator)
 
-    # We write the output to a file
-    pandas.write_file_balance(outputList,output,separator)
+    # Log the completion
+    f.log("Running total calculation completed and output written to file.")
 
     pass
 
 
-
-
 def command_chart(run, config):
+    """
+    Generates charts based on the configuration and input data.
 
-    # We get the initial parameters, including the separator and the input and output location
-    separator = config["CSV_Separator"]
-    input = f.get_full_Path(run["input"])
-    output = f.get_full_Path(run["output"])
-    type = f.get_runParameter(run, "type")
-    index_Name = f.get_runParameter(run, "index_Name")
-    column_Name = f.get_runParameter(run, "column_Name")
-    value_Name = f.get_runParameter(run, "value_Name")
-    colormap = f.get_runParameter(run, "colormap")
-    title = f.get_runParameter(run, "title")
-    invert = f.get_runParameter(run, "invert")
-    max_legend_entries = f.get_runParameter(run, "max_legend_entries")
-    rounding  = f.get_runParameter(run, "rounding")
+    Parameters:
+    run (dict): Contains 'input' and 'output' paths and other parameters for the chart.
+    config (dict): Configuration containing 'CSV_Separator'.
+    """
 
-    # We get the input data
-    data = pandas.read_file(input,separator )
+    # Retrieve configuration parameters
+    separator = config.get("CSV_Separator", ",")
+    input = f.get_full_Path(run.get("input"))
+    output = f.get_full_Path(run.get("output"))
+    chart_params = {
+        "type": f.get_runParameter(run, "type"),
+        "index_Name": f.get_runParameter(run, "index_Name"),
+        "column_Name": f.get_runParameter(run, "column_Name"),
+        "value_Name": f.get_runParameter(run, "value_Name"),
+        "colormap": f.get_runParameter(run, "colormap"),
+        "title": f.get_runParameter(run, "title"),
+        "invert": f.get_runParameter(run, "invert"),
+        "max_legend_entries": f.get_runParameter(run, "max_legend_entries"),
+        "rounding": f.get_runParameter(run, "rounding")
+    }
 
-    # We get the filter rules and adjust our input data accordingly
+    # Read the input data
+    data = pandas.read_file(input, separator)
+    f.log(f"Input data loaded from {input}.")
+
+    # Apply filters to the data
     filters = f.get_runParameter(run, "filters")
-    data = f.run_filters(data,filters )
+    data = f.run_filters(data, filters)
+    f.log(f"Applied filters: {filters}.")
 
-    # We invert the values if required
-    if invert:
-        data[value_Name] = -data[value_Name]
+    # Invert values if required
+    if chart_params["invert"]:
+        data[chart_params["value_Name"]] = -data[chart_params["value_Name"]]
+        f.log(f"Inverted values in column {chart_params['value_Name']}.")
 
-    # We import the charting class
+    # Import the charting class
     import classes.charts as charts
+    f.log("Charting class imported.")
 
-    # we call the relevant charting function
-    if type == "stackedBar":
-        charts.generate_stackedBarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
-    if type == "Bar":
-        charts.generate_BarChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
-    if type == "pieChart":
-        charts.generate_pieChart(data, column_Name, value_Name, output,title, colormap )
-    if type == "stackedlineChart":
-        charts.generate_stackedlineChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
-    if type == "lineChart":
-        charts.generate_lineChart(data,index_Name, column_Name, value_Name,output,title, colormap , max_legend_entries, rounding)
+    # Define chart type to function mapping
+    chart_functions = {
+        "stackedBar": charts.generate_stackedBarChart,
+        "Bar": charts.generate_BarChart,
+        "pieChart": charts.generate_pieChart,
+        "stackedlineChart": charts.generate_stackedlineChart,
+        "lineChart": charts.generate_lineChart
+    }
+
+    # Generate the chart based on the specified type
+    chart_func = chart_functions.get(chart_params["type"])
+    if chart_func:
+        chart_func(data, chart_params["index_Name"], chart_params["column_Name"], chart_params["value_Name"],
+                   output, chart_params["title"], chart_params["colormap"], chart_params["max_legend_entries"],
+                   chart_params["rounding"])
+        f.log(f"Chart of type {chart_params['type']} generated and saved to {output}.")
+    else:
+        f.log(f"Invalid chart type specified: {chart_params['type']}")
 
     pass
 
 
 def command_compress(run, config):
-    # We get the initial parameters, including the separator and the input and output location
+    """
+    Compresses transaction data into a summary DataFrame and writes it to a file.
+
+    Parameters:
+    run (dict): Contains 'input' and 'output' paths.
+    config (dict): Configuration containing 'CSV_Separator'.
+    """
+
+    # Retrieve separator and file paths from the configuration
     separator = config["CSV_Separator"]
     input = f.get_full_Path(run["input"])
     output = f.get_full_Path(run["output"])
 
-    # We read the transaction files
+    # Read transaction files
     input_data = pandas.read_file(input, separator)
 
-    # We separate out the non-Transaction entries
+    # Extract different types of entries
     transactions = f.get_transactions(input_data)
-    priceUpdates = f.get_priceUpdates(input_data)
-    Benchmark = f.get_benchmark(input_data)
 
-
-    # We get the unique Accounts, Quantity_Type and Cost_Type
-    unique_Account =  transactions["Account"].unique()
+    # Get unique values for multi-index creation
+    unique_Account = transactions["Account"].unique()
     unique_Quantity_Type = transactions["Quantity_Type"].unique()
     unique_Cost_Type = transactions["Cost_Type"].unique()
 
-
     # Create MultiIndex DataFrame
     keys = [unique_Account, unique_Quantity_Type, unique_Cost_Type]
-
     output_Entries = pd.MultiIndex.from_product(keys, names=["Account", "Quantity_Type", "Cost_Type"]).to_frame()
-    # Initialize 'Quantity' and 'Cost' columns with NaN
-    output_Entries['Quantity'] = 0.0
-    output_Entries['Cost'] = 0.0
 
-    print("Before updating:")
-    pd.set_option('display.max_columns', None)
-    print(output_Entries.head(55))
+    # Initialize 'Quantity' and 'Cost' columns with Decimal values
+    output_Entries['Quantity'] = Decimal(0.0)
+    output_Entries['Cost'] = Decimal(0.0)
 
-    # Now updating the specific row based on input_data
+    # Sort the DataFrame by MultiIndex to optimize performance
+    output_Entries = output_Entries.sort_index()
+    f.log("Initialized MultiIndex DataFrame and sorted by index.")
+
+    # Update the 'Quantity' and 'Cost' columns
     for index, row in transactions.iterrows():
-        # Get the index values for the current row
         account = row["Account"]
         quantity_type = row["Quantity_Type"]
         cost_type = row["Cost_Type"]
 
-        # Update the Quantity and Cost by adding the new values from input_data
-        new_quantity = row['Quantity'] if pd.notna(row['Quantity']) else 0
-        new_cost = row['Cost'] if pd.notna(row['Cost']) else 0
+        new_quantity = row['Quantity'] if pd.notna(row['Quantity']) else Decimal(0.0)
+        new_cost = row['Cost'] if pd.notna(row['Cost']) else Decimal(0.0)
 
-        # Use .loc to update the values
-        current_quantity = output_Entries.loc[(account, quantity_type, cost_type)].loc["Quantity"]
-        current_cost = output_Entries.loc[(account, quantity_type, cost_type)].loc["Cost"]
+        # Use .at for scalar updates which can be more efficient
+        loc_index = (account, quantity_type, cost_type)
+        if loc_index in output_Entries.index:
+            current_quantity = output_Entries.at[loc_index, 'Quantity']
+            current_cost = output_Entries.at[loc_index, 'Cost']
 
+            # Update values
+            output_Entries.at[loc_index, 'Quantity'] = current_quantity + new_quantity
+            output_Entries.at[loc_index, 'Cost'] = current_cost + new_cost
+        else:
+            # If the index is not present, you might need to handle this case
+            f.log(f"Index {loc_index} not found in output_Entries.")
 
-        if pd.isna(current_quantity):
-            current_quantity = 0
-        if pd.isna(current_cost):
-            current_cost = 0
-
-        output_Entries.loc[(account, quantity_type, cost_type), 'Quantity'] = current_quantity + new_quantity
-        output_Entries.loc[(account, quantity_type, cost_type), 'Cost'] = current_cost + new_cost
-
-
-    print("\nAfter updating:")
-    print(output_Entries.head(5))
-
-    # Drop rows with both "Quantity" and "Cost" as NaN
+    # Drop rows where both 'Quantity' and 'Cost' are NaN
     output_Entries = output_Entries.dropna(subset=['Quantity', 'Cost'], how='all')
 
-    # Reset the index to convert MultiIndex to columns
+    # Reset index to convert MultiIndex to columns
     output_Entries_reset = output_Entries.reset_index(drop=True)
 
-
-    # Drop rows where both "Quantity" and "Cost" are 0.0
+    # Drop rows where both 'Quantity' and 'Cost' are 0.0
     output_Entries_reset = output_Entries_reset[
-        ~((output_Entries_reset['Quantity'] == 0.0) & (output_Entries_reset['Cost'] == 0.0))]
+        ~((output_Entries_reset['Quantity'] == Decimal(0.0)) & (output_Entries_reset['Cost'] == Decimal(0.0)))
+    ]
 
-    print("\nAfter resetting index and cleaning:")
-    print(output_Entries_reset.head(55))
-
+    # Add additional columns
     output_Entries_reset["Date"] = max(input_data["Date"])
     output_Entries_reset["Type"] = "Transaction"
-    output_Entries_reset["ID"] = "Compress_" + str(random.randrange(0,99999999999999))
+    output_Entries_reset["ID"] = "Compress_" + str(random.randrange(0, 99999999999999))
     output_Entries_reset["Name"] = "End of period compression"
 
+    # Write the result to a file
     pandas.write_file_entries(output_Entries_reset, output, separator)
-    print("Completed")
-    pass
+    f.log("Compression complete and data written to file.")

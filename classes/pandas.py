@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pandas as pd
 from classes.functions import Functions as f
 
@@ -10,6 +12,14 @@ def read_file(filepath, separator) -> pd.DataFrame:
         except:
             f.log("Failed to open " + filepath)
             entries = pd.DataFrame()
+
+
+    # Convert the "Quantity" and "Cost" columns to Decimal
+    if not entries.empty:
+        for column in ["Quantity", "Cost"]:
+            if column in entries.columns:
+                entries[column] = entries[column].apply(lambda x: Decimal(str(x)))
+
     return entries
 
 def write_file_entries(entries, output, separator):
@@ -26,7 +36,19 @@ def write_file_balance(entries, output, separator):
     pass
 
 def get_cumulativesum(entries):
-    entries["RunningTotal"] = entries.groupby(by=["Account","Quantity_Type"])["Quantity"].cumsum(skipna=True)
+    #entries["RunningTotal"] = entries.groupby(by=["Account","Quantity_Type"])["Quantity"].cumsum(skipna=True)
+    # Convert 'Quantity' to float for computation
+    entries['Quantity_float'] = entries['Quantity'].apply(lambda x: float(x) if isinstance(x, Decimal) else x)
+
+    # Calculate cumulative sum with float values
+    entries['RunningTotal_float'] = entries.groupby(by=["Account", "Quantity_Type"])['Quantity_float'].cumsum()
+
+    # Optionally convert the RunningTotal back to Decimal if required
+    entries['RunningTotal'] = entries['RunningTotal_float'].apply(lambda x: Decimal(str(x)))
+
+    # Drop temporary columns
+    entries = entries.drop(columns=['Quantity_float', 'RunningTotal_float'])
+
     return entries
 
 
