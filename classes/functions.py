@@ -30,8 +30,8 @@ class Functions:
 
 
     def get_ListFilesInDir(folder):
-        return [os.path.join(folder, f) for f in os.listdir(folder)]
-    pass
+        """Return a list of files only (not folders) within the given directory"""
+        return [os.path.join(folder, f) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
 
     def read_XML(file):
         tree = ET.parse(file)

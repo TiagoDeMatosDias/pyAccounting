@@ -38,5 +38,8 @@ class Commands:
         elif run["task"] == "validate":
             d.command_validate(run, config)
             pass
+        elif run["task"] == "compress":
+            d.command_compress(run, config)
+            pass
         else:
             f.log("Other Command")

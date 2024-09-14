@@ -1,4 +1,7 @@
+import math
 import random
+
+import numpy as np
 
 from classes.functions import Functions as functions
 from decimal import Decimal
@@ -41,14 +44,24 @@ def import_Entries(parserLocation):
 
 def get_entriesFromFile(inputFile, parser_config, rules):
     entries = []
-    n26 = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=[parser_config["DateColumn"]], date_format=parser_config["DateFormat"])
+    format = get_File_Format(inputFile)
 
-    for index, row in n26.iterrows():
-        entries = functions.combine_lists(convert_transaction(row, parser_config, rules), entries)
+    if format == 1:
+        n26 = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=["Date"], date_format=parser_config["DateFormat"])
+        for index, row in n26.iterrows():
+            entries = functions.combine_lists(convert_transaction_format_1(row, parser_config, rules), entries)
+
+    elif format == 2:
+        n26 = pd.read_csv(filepath_or_buffer=inputFile, sep=parser_config["separator"], parse_dates=["Booking Date"], date_format=parser_config["DateFormat"])
+        for index, row in n26.iterrows():
+            e = convert_transaction_format_2(row, parser_config, rules)
+            if e != None:
+                entries = functions.combine_lists(e, entries)
+
 
     return entries
 
-def convert_transaction(row, parser_config, rules):
+def convert_transaction_format_1(row, parser_config, rules):
     ## Columns
     Date = []
     Type = []
@@ -63,7 +76,18 @@ def convert_transaction(row, parser_config, rules):
     account_subAccount = parser_config["SubAccounts"]
     name = str(str(row["Payee"]) + "_" + str(row["Account number"]) + str(row["Payment reference"]) ).replace(" ", "").replace(",", "").upper()
 
-    account = get_Account(name, parser_config, rules)
+
+
+    # We do a check for internal transfers. If not we get the account from the rules table
+    # Sending To Other Account
+    if row["Transaction type"] == "Outgoing Transfer" and str(row["Account number"]) == "nan" and row["Payee"] != "N26 Bank":
+        account = "Assets:Banks:n26:Spaces"
+    # Receiving From Other Account
+    elif row["Transaction type"] == "Income" and str(row["Account number"]) == "nan":
+        account = "Assets:Banks:n26:Spaces"
+    else:
+        account = get_Account(name, parser_config, rules)
+
     id = "N26_" + str(random.randrange(0,99999999999999))
 
 
@@ -105,6 +129,76 @@ def convert_transaction(row, parser_config, rules):
     return entries
 
 
+def convert_transaction_format_2(row, parser_config, rules):
+    ## Columns
+    Date = []
+    Type = []
+    ID = []
+    Name = []
+    Account = []
+    Quantity = []
+    Quantity_Type = []
+    Cost = []
+    Cost_Type = []
+
+    account_subAccount = parser_config["SubAccounts"]
+    name = str(str(row["Partner Name"]) + "_" + str(row["Partner Iban"]) + str(row["Payment Reference"]) ).replace(" ", "").replace(",", "").upper()
+
+
+
+    # We do a check for internal transfers. If not we get the account from the rules table
+    # Sending To Other Account
+    # We ignore rows that don't happen in the main account
+    if row["Account Name"] != "Main Account" :
+
+        return None
+
+    if row["Account Name"] == "Main Account" and str(row["Partner Iban"]) == "nan" and  (str(row["Type"]) == "Credit Transfer" or str(row["Type"]) == "Debit Transfer"):
+        account = "Assets:Banks:n26:Spaces"
+    else:
+        account = get_Account(name, parser_config, rules)
+
+    id = "N26_" + str(random.randrange(0,99999999999999))
+
+
+    # entry 1
+    Date.append(row["Booking Date"])
+    Type.append("Transaction")
+    ID.append(id)
+    Name.append(name)
+    Account.append(account_subAccount)
+    Quantity.append(row["Amount (EUR)"])
+    Quantity_Type.append(parser_config['DefaultCurrency'])
+    Cost.append(None)
+    Cost_Type.append(None)
+
+    # entry 2
+    Date.append(row["Booking Date"])
+    Type.append("Transaction")
+    ID.append(id)
+    Name.append(name)
+    Account.append(account)
+    Quantity.append(Decimal( row["Amount (EUR)"]).copy_negate())
+    Quantity_Type.append(parser_config['DefaultCurrency'])
+    Cost.append(None)
+    Cost_Type.append(None)
+
+    ##Join the data
+    entries = {
+        "Date": Date,
+        "Type": Type,
+        "ID": ID,
+        "Name": Name,
+        "Account": Account,
+        "Quantity": Quantity,
+        "Quantity_Type": Quantity_Type,
+        "Cost": Cost,
+        "Cost_Type": Cost_Type,
+    }
+
+    return entries
+
+
 
 def get_Account(name, parser_config, rules):
     out = parser_config['UndefinedAccount']
@@ -120,3 +214,18 @@ def get_Account(name, parser_config, rules):
     return out
 
 
+
+def get_File_Format(inputFile):
+    with open(inputFile) as f:
+        first_line = f.readline()
+        f.close()
+
+    format_2023 = '"Date","Payee","Account number","Transaction type","Payment reference","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"\n'
+    format_2024 = '"Booking Date","Value Date","Partner Name","Partner Iban",Type,"Payment Reference","Account Name","Amount (EUR)","Original Amount","Original Currency","Exchange Rate"\n'
+
+    if first_line == format_2023:
+        return 1
+    elif first_line == format_2024:
+        return 2
+
+    return 0

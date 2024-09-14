@@ -120,7 +120,8 @@ def generate_stackedlineChart(data, Index_Name, Columns_Name, Values_Name, SaveL
           kind='line',
           stacked=True,
           ax=ax,
-          label='Inline label'
+          label='Inline label',
+          grid=True
      )
 
      # Customize the plot

@@ -1,5 +1,27 @@
 {
   "Runs": [
-
+	 {
+      "output": "Files/output/output_compressed.csv",
+      "input": "Files/output/output_merged.csv",
+      "task": "compress",
+      "type": "IBKR",
+	  "runId":"0"
+    },
+    {
+      "output": "Files\\output\\Balance_baseline.csv",
+      "input": "Files\\output\\output_merged.csv",
+      "task": "balance",
+      "type": "IBKR",
+      "groupTypes": true,
+	  "runId":"3"
+    },
+    {
+      "output": "Files\\output\\Balance_Compressed.csv",
+      "input": "Files\\output\\output_compressed.csv",
+      "task": "balance",
+      "type": "IBKR",
+      "groupTypes": true,
+	  "runId":"3"
+    }
   ]
 }

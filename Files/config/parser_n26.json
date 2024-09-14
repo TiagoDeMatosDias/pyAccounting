@@ -1,7 +1,7 @@
 {
     "Name": "n26",
     "DefaultCurrency": "EUR",
-    "SubAccounts": "Assets:Banks:n26:MainAccount:Cash",
+    "SubAccounts": "Assets:Banks:n26:MainAccount",
     "UndefinedAccount" : "Expenses:n26:Unregistered",
     "input":"Files/input/n26",
     "DateColumn": "Date",
