@@ -13,98 +13,211 @@ import classes.parser_yahooFinance as yahooFinance
 
 
 def command_parser(run, config):
-    if run["type"] == "IBKR":
+    """
+    Parses and processes entries based on the specified type by delegating to appropriate handlers.
+
+    This function performs the following steps:
+    1. Determines the type of data source from the `run` parameter.
+    2. Calls the appropriate function to process entries based on the data source type.
+    3. Handles different types of sources including IBKR, n26, wise, and yFinance.
+
+    Parameters:
+    - run (dict): Contains runtime parameters including the type of data source and other relevant details.
+    - config (dict): Contains configuration settings that might be required by the data source handlers.
+
+    """
+    # Log the type of data source being processed
+    data_type = run.get("type", "Unknown")
+    f.log(f"Processing entries for data source type: {data_type}")
+
+    # Process entries based on the specified type
+    if data_type == "IBKR":
+        f.log("Delegating to IBKR handler.")
         IBKR.write_Entries(run, config)
-        pass
-    elif run["type"] == "n26":
+    elif data_type == "n26":
+        f.log("Delegating to n26 handler.")
         n26.write_Entries(run, config)
-        pass
-    elif run["type"] == "wise":
+    elif data_type == "wise":
+        f.log("Delegating to wise handler.")
         wise.write_Entries(run, config)
-        pass
-    elif run["type"] == "yFinance":
-        yahooFinance.write_Entries(run,config)
-        pass
-    pass
+    elif data_type == "yFinance":
+        f.log("Delegating to yFinance handler.")
+        yahooFinance.write_Entries(run, config)
+    else:
+        f.log(f"Unknown data source type: {data_type}. No handler found.")
+
+    f.log("Parsing process completed.")
+
 
 
 def command_merge(run, config):
-    # We get the initial parameters, including the separator and the input and output location
+    """
+    Merges multiple CSV files into a single DataFrame, sorts by date, and writes the output to a file.
+
+    This function performs the following steps:
+    1. Retrieves the list of input file paths and the output file path from the provided parameters.
+    2. Reads data from each input file and combines them into a single DataFrame.
+    3. Sorts the combined DataFrame by the 'Date' column in ascending order.
+    4. Writes the sorted DataFrame to an output file. If writing entries fails, attempts to write the balance data.
+
+    Parameters:
+    - run (dict): Contains runtime parameters including input file paths and output file path.
+    - config (dict): Contains configuration settings such as CSV separator.
+
+    """
+    # Retrieve the input file paths and output file path
     inputs = f.get_runParameter(run, "inputs")
     output = f.get_runParameter(run, "output")
     separator = config["CSV_Separator"]
 
-    # We combine the data
+    # Initialize an empty list to hold DataFrames
     entries = []
+    f.log("Starting the merge process.")
+
     for input in inputs:
-        # We get the data
-        data = pandas.read_file(f.get_runParameter(input, "input"), separator)
+        # Read data from each input file
+        try:
+            data = pandas.read_file(f.get_runParameter(input, "input"), separator)
+            f.log(f"Successfully read data from {input}.")
+        except Exception as e:
+            f.log(f"Error reading data from {input}: {e}")
+            continue  # Skip this file and continue with the next
+
+        # Combine the data from all input files
         entries = f.combine_lists(entries, data)
 
-    # We sort it by Date
+    # Convert the list of DataFrames to a single DataFrame
     entries = pd.DataFrame(entries)
-    entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
+    f.log("Combined all data entries into a single DataFrame.")
 
-    # We write the output to a file
-    # We write the output to a file
+    # Sort the DataFrame by the 'Date' column
+    entries = entries.sort_values(by="Date", ascending=True).reset_index(drop=True)
+    f.log("Sorted the DataFrame by 'Date' in ascending order.")
+
+    # Write the sorted DataFrame to the output file
     try:
         pandas.write_file_entries(entries, output, separator)
-    except:
-        pandas.write_file_balance(entries, output, separator)
-    pass
+        f.log(f"Successfully wrote the merged data to {output}.")
+    except Exception as e:
+        f.log(f"Error writing merged data to {output}: {e}. Attempting to write balance data.")
+        try:
+            pandas.write_file_balance(entries, output, separator)
+            f.log(f"Successfully wrote balance data to {output}.")
+        except Exception as e:
+            f.log(f"Error writing balance data to {output}: {e}")
+
+    f.log("Merge process completed.")
+
 
 
 def command_filter(run, config):
-    # We get the initial parameters, including the separator and the input and output location
-    input = f.get_runParameter(run, "input")
-    output = f.get_runParameter(run, "output")
+    """
+    Filters data based on provided filter rules and writes the filtered data to an output file.
+
+    This function performs the following steps:
+    1. Retrieves the input and output file paths and separator from the `run` and `config` parameters.
+    2. Reads the data from the input file.
+    3. Applies filter rules to the data.
+    4. Writes the filtered data to the output file, handling any exceptions that may occur.
+
+    Parameters:
+    - run (dict): Contains runtime parameters including input file path, output file path, and filter rules.
+    - config (dict): Contains configuration settings including CSV separator.
+    """
+    # Retrieve parameters from run and config
+    input_path = f.get_runParameter(run, "input")
+    output_path = f.get_runParameter(run, "output")
     separator = config["CSV_Separator"]
 
-    # We get the data
-    data = pandas.read_file(input, separator)
+    # Log the input parameters
+    f.log(f"Input file: {input_path}")
+    f.log(f"Output file: {output_path}")
+    f.log(f"CSV Separator: {separator}")
 
-    # We get the filter rules and adjust our input data accordingly
+    # Read the data from the input file
+    f.log("Reading data from input file.")
+    data = pandas.read_file(input_path, separator)
+
+    # Retrieve and apply filter rules to the data
     filters = f.get_runParameter(run, "filters")
+    f.log(f"Applying filters: {filters}")
     data = f.run_filters(data, filters)
 
-    # We write the output to a file
+    # Attempt to write the filtered data to the output file
     try:
-        pandas.write_file_entries(data, output, separator)
-    except:
-        pandas.write_file_balance(data, output, separator)
-def command_validate(run,config):
-    # We get the initial parameters, including the separator and the input and output location
-    input = f.get_runParameter(run, "input")
-    output = f.get_runParameter(run, "output")
+        f.log("Writing filtered data to output file.")
+        pandas.write_file_entries(data, output_path, separator)
+    except Exception as e:
+        f.log(f"Failed to write data using write_file_entries. Error: {e}")
+        f.log("Attempting to write using write_file_balance.")
+        try:
+            pandas.write_file_balance(data, output_path, separator)
+        except Exception as e:
+            f.log(f"Failed to write data using write_file_balance. Error: {e}")
+            f.log("Unable to write filtered data to output file.")
+
+    f.log("Data filtering and writing process completed.")
+
+
+def command_validate(run, config):
+    """
+    Validates transactions to ensure they balance correctly and writes the results to an output file.
+
+    This function performs the following steps:
+    1. Retrieves input and output file paths and separator from the `run` and `config` parameters.
+    2. Reads data from the input file.
+    3. Filters the data to get transactions.
+    4. For each unique transaction ID, checks if the transaction is valid (i.e., it balances out).
+    5. Writes the validation results to the output file.
+
+    Parameters:
+    - run (dict): Contains runtime parameters including input file path and output file path.
+    - config (dict): Contains configuration settings including CSV separator.
+    """
+    # Retrieve parameters from run and config
+    input_path = f.get_runParameter(run, "input")
+    output_path = f.get_runParameter(run, "output")
     separator = config["CSV_Separator"]
 
+    # Log the input parameters
+    f.log(f"Input file: {input_path}")
+    f.log(f"Output file: {output_path}")
+    f.log(f"CSV Separator: {separator}")
 
-    # We get the data
-    data = pandas.read_file(input, separator)
+    # Read the data from the input file
+    f.log("Reading data from input file.")
+    data = pandas.read_file(input_path, separator)
 
-    # We get only the transactions
-    transactions = f.filter_data(data, "Equals", "Type", "Transaction")
+    # Filter data to get only transactions
+    f.log("Filtering data to get transactions.")
+    data = f.filter_data(data, "Equals", "Type", "Transaction")
 
-    # for every unique transaction, we check if it balances out
+    # Initialize lists to store results
+    ids = []
+    results = []
 
-    id=[]
-    result=[]
+    # Validate each unique transaction ID
+    f.log("Validating transactions.")
     for transaction_ID in data["ID"].unique():
-        Valid = pandas.validate_Transaction(f.filter_data(data, "Equals", "ID", transaction_ID))
-        id.append(transaction_ID)
-        result.append(Valid)
+        # Filter data for the current transaction ID and validate
+        transaction_data = f.filter_data(data, "Equals", "ID", transaction_ID)
+        valid = pandas.validate_Transaction(transaction_data)
 
-    results = {
-        "Transaction ID": id,
-        "Result": result,
-    }
+        # Append results
+        ids.append(transaction_ID)
+        results.append(valid)
 
-    results = pd.DataFrame(results)
+    # Create a DataFrame to hold the validation results
+    results_df = pd.DataFrame({
+        "Transaction ID": ids,
+        "Result": results
+    })
 
-    pandas.write_file_balance(results, output, separator)
+    # Write the validation results to the output file
+    f.log("Writing validation results to output file.")
+    pandas.write_file_balance(results_df, output_path, separator)
 
-    pass
-
+    f.log("Transaction validation process completed.")
 
 
 def command_benchmark(run, config):

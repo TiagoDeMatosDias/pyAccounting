@@ -1,22 +1,12 @@
 {
   "Runs": [
-{
-      "output": "Files/output/output_InvestmentvsBenchmark_Q_noGroup_new.csv",
-      "input": "Files/output/output_2_benchmark.csv",
-      "task": "runningTotal",
-      "increment": "QE",
-      "fairValueCurrency": "EUR",
-      "groupTypes": false,
-	  "runId":"5"
-    },
-    {
-      "output": "Files/output/output_InvestmentvsBenchmark_wk_new.csv",
-      "input": "Files/output/output_2_benchmark.csv",
-      "task": "runningTotal",
-      "increment": "W",
-      "fairValueCurrency": "EUR",
-      "groupTypes": true,
-	  "runId":"5"
+
+
+    	 {
+      "output": "Files/output/Validation_new.csv",
+      "input": "Files/output/output_merged.csv",
+      "task": "validate",
+	  "runId":"0"
     }
   ]
 }
