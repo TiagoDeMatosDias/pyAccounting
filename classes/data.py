@@ -11,7 +11,6 @@ import classes.parser_n26 as n26
 import classes.parser_wise as wise
 import classes.parser_yahooFinance as yahooFinance
 
-
 def command_parser(run, config):
     """
     Parses and processes entries based on the specified type by delegating to appropriate handlers.
@@ -47,7 +46,6 @@ def command_parser(run, config):
         f.log(f"Unknown data source type: {data_type}. No handler found.")
 
     f.log("Parsing process completed.")
-
 
 
 def command_merge(run, config):
@@ -107,7 +105,6 @@ def command_merge(run, config):
             f.log(f"Error writing balance data to {output}: {e}")
 
     f.log("Merge process completed.")
-
 
 
 def command_filter(run, config):
@@ -219,135 +216,196 @@ def command_validate(run, config):
 
     f.log("Transaction validation process completed.")
 
-
 def command_benchmark(run, config):
-    # We get the initial parameters, including the separator and the input and output location
+    """
+    Adds benchmark entries based on a given benchmark ticker. For each transaction in the input data
+    that matches specific criteria, the function calculates the benchmark quantity using the latest
+    price of the benchmark ticker and appends a new 'Benchmark' entry to the data.
+
+    The function performs the following steps:
+    1. Reads input parameters (file paths, ticker, max depth, etc.).
+    2. Filters the data for relevant transactions.
+    3. For each matching transaction, calculates the benchmark quantity based on the ticker price.
+    4. Adds a new benchmark entry and writes the updated data to the output file.
+
+    Parameters:
+    - run (dict): Contains runtime parameters including input/output file paths, benchmarkTicker, and benchmark account.
+    - config (dict): Contains configuration settings such as the CSV separator.
+    """
+
+    # Step 1: Retrieve the initial parameters
     separator = config["CSV_Separator"]
-    input = f.get_full_Path(run["input"])
-    output = f.get_full_Path(run["output"])
-    benchmarkTicker = f.get_runParameter(run, "benchmarkTicker")
-    maxDepth = f.get_runParameter(run, "maxDepth")
+    input_path = f.get_full_Path(run["input"])
+    output_path = f.get_full_Path(run["output"])
+    benchmark_ticker = f.get_runParameter(run, "benchmarkTicker")
+    max_depth = f.get_runParameter(run, "maxDepth")
 
-    # We read the file
-    entries = pandas.read_file(input,separator )
+    # Log the retrieved parameters
+    f.log(f"Input file: {input_path}")
+    f.log(f"Output file: {output_path}")
+    f.log(f"CSV Separator: {separator}")
+    f.log(f"Benchmark Ticker: {benchmark_ticker}")
+    f.log(f"Max Depth: {max_depth}")
 
+    # Step 2: Read the input file
+    f.log("Reading data from input file.")
+    entries = pandas.read_file(input_path, separator)
 
+    # Step 3: Filter entries to get only 'Transaction' types related to the benchmark account
+    f.log("Filtering transactions related to the benchmark account.")
     entries_filtered = entries.loc[entries['Type'] == "Transaction"]
     entries_filtered = entries_filtered.loc[entries_filtered['Account'] == run["benchmark"]]
     entries_filtered = entries_filtered.loc[entries_filtered['ID'].str.contains("IBKR_")]
 
+    f.log(f"Found {len(entries_filtered)} relevant transactions to process.")
+
+    # Step 4: Iterate over each filtered transaction and calculate benchmark entries
     for index, row in entries_filtered.iterrows():
         date = row["Date"]
-        priceChanges = f.get_priceUpdates(entries)
-        price = f.get_LatestPrice(priceChanges,row["Date"], benchmarkTicker, row["Quantity_Type"], 0, maxDepth)
-        if price == None:
+
+        # Get price updates and the latest price for the benchmark ticker
+        price_changes = f.get_priceUpdates(entries)
+        price = f.get_LatestPrice(price_changes, row["Date"], benchmark_ticker, row["Quantity_Type"], 0, max_depth)
+
+        # Calculate the benchmark quantity (if no price is found, set quantity to 0)
+        if price is None:
+            f.log(f"No price found for {benchmark_ticker} on {date}, setting quantity to 0.")
             quantity = 0
         else:
-            quantity = round( Decimal( row["Quantity"]) / Decimal(price))
+            quantity = round(Decimal(row["Quantity"]) / Decimal(price))
+            f.log(f"Price found for {benchmark_ticker} on {date}: {price}, calculated quantity: {quantity}.")
 
-        benchmarkEntry = pd.DataFrame( [{
+        # Step 5: Create the benchmark entry
+        benchmark_entry = pd.DataFrame([{
             "Date": date,
             "Type": "Benchmark",
-            "ID": "Benchmark_" +  str(random.randrange(0,99999999999999)),
-            "Name": benchmarkTicker,
+            "ID": "Benchmark_" + str(random.randrange(0, 99999999999999)),
+            "Name": benchmark_ticker,
             "Account": "Benchmark",
-            "Quantity": Decimal( quantity).copy_negate(),
-            "Quantity_Type": benchmarkTicker,
-            "Cost": Decimal( row["Quantity"]).copy_negate(),
+            "Quantity": Decimal(quantity).copy_negate(),  # Set the benchmark quantity as negative
+            "Quantity_Type": benchmark_ticker,
+            "Cost": Decimal(row["Quantity"]).copy_negate(),  # Set the cost as negative
             "Cost_Type": row["Quantity_Type"],
         }])
 
-        entries = pd.concat([entries, benchmarkEntry], ignore_index=True)
+        f.log(f"Generated benchmark entry for {benchmark_ticker} on {date}: {benchmark_entry.to_dict()}")
 
-    # We write the output to a file
-    pandas.write_file_entries(entries,output,separator)
+        # Append the benchmark entry to the main entries data
+        entries = pd.concat([entries, benchmark_entry], ignore_index=True)
 
+    # Step 6: Write the updated entries to the output file
+    f.log(f"Writing updated data to {output_path}.")
+    pandas.write_file_entries(entries, output_path, separator)
+
+    f.log("Benchmark processing completed successfully.")
     pass
 
 
-
-
-
 def command_balance(run, config):
+    """
+    Calculates account balances and optionally computes fair value if a currency and date are provided.
 
-    # We get the initial parameters, including the separator and the input and output location
+    This function performs the following steps:
+    1. Retrieves input/output paths, separator, and relevant parameters such as fairValueCurrency, fairValueDate, and groupTypes.
+    2. Reads the input data and filters it.
+    3. Cross joins accounts and quantity types to compute the total balance for each combination.
+    4. If a fair value currency is provided, computes the fair value for each asset based on the latest prices.
+    5. Writes the results (balance or fair value) to an output file.
+
+    Parameters:
+    - run (dict): Contains runtime parameters including input file path and output file path.
+    - config (dict): Contains configuration settings such as the CSV separator.
+    """
+
+    # Step 1: Retrieve initial parameters
     separator = config["CSV_Separator"]
-    input = f.get_full_Path(run["input"])
-    output = f.get_full_Path(run["output"])
+    input_path = f.get_full_Path(run["input"])
+    output_path = f.get_full_Path(run["output"])
     fairValueCurrency = f.get_runParameter(run, "fairValueCurrency")
     fairValueDate = f.get_runParameter(run, "fairValueDate")
     groupTypes = f.get_runParameter(run, "groupTypes")
 
-    # We read the data
-    e = pandas.read_file(input,separator )
+    # Log initial parameters
+    f.log(f"Input file: {input_path}")
+    f.log(f"Output file: {output_path}")
+    f.log(f"CSV Separator: {separator}")
+    f.log(f"Fair Value Currency: {fairValueCurrency}")
+    f.log(f"Fair Value Date: {fairValueDate}")
+    f.log(f"Group Types: {groupTypes}")
 
-    # We get only the price updates up to the fair value date
-    PriceChanges = f.get_priceUpdates(e)
-    try:
-        PriceChanges = f.filter_data(PriceChanges, "Max", "Date", fairValueDate)
-    except:
-        f.log("No fair value date")
-    # We get only the transactions
-    #data = f.get_transactions(e)
-    data = e
-    # We get the filter rules and adjust our input data accordingly
+    # Step 2: Read the input data
+    f.log("Reading data from input file.")
+    data = pandas.read_file(input_path, separator)
+
+    # Step 3: Get price updates and filter by fair value date if provided
+    f.log("Fetching price updates.")
+    price_changes = f.get_priceUpdates(data)
+    if fairValueDate:
+        try:
+            price_changes = f.filter_data(price_changes, "Max", "Date", fairValueDate)
+            f.log(f"Filtered price changes up to {fairValueDate}.")
+        except Exception as e:
+            f.log(f"No fair value date or error encountered: {str(e)}")
+
+    # Step 4: Filter transactions based on the rules
     filters = f.get_runParameter(run, "filters")
-    data = f.run_filters(data,filters )
+    f.log(f"Applying filters: {filters}")
+    filtered_data = f.run_filters(data, filters)
 
+    # Step 5: Cross join accounts and quantity types to create the balance frame
+    f.log("Generating cross-joined frames for accounts and quantity types.")
+    balance_frame = pandas.get_crossJoinedFrames(
+        pandas.get_uniqueFrame(filtered_data, "Account"),
+        pandas.get_uniqueFrame(filtered_data, "Quantity_Type")
+    )
 
-    # We get the cross join frame
-    runningTotalFrame = pandas.get_crossJoinedFrames(pandas.get_uniqueFrame(data, "Account"), pandas.get_uniqueFrame(data, "Quantity_Type"))
-    runningTotalFrame = runningTotalFrame.dropna(subset=["Account", "Quantity_Type"])
+    # Remove rows with missing Account or Quantity_Type
+    balance_frame = balance_frame.dropna(subset=["Account", "Quantity_Type"])
 
-    # We get the data for the frame and do the sum
-    change = data.groupby( ["Account", "Quantity_Type"])["Quantity"].sum()
+    # Step 6: Group by Account and Quantity_Type to sum up the quantities
+    f.log("Calculating total quantities for each Account and Quantity_Type.")
+    changes = filtered_data.groupby(["Account", "Quantity_Type"])["Quantity"].sum()
 
-    # We merge the sums with the cross join, filling out the empty values
-    result = runningTotalFrame.merge(change, how="left", on=["Account", "Quantity_Type"])
-    result = result.fillna(0)
+    # Merge the sum into the balance frame and fill missing values with 0
+    result = balance_frame.merge(changes, how="left", on=["Account", "Quantity_Type"]).fillna(0)
 
-    # If we have a fair value currency, we use it to get the fair value of the balance at the last date
-    if fairValueCurrency != None:
-        # We set the price of the assets
-        result["Price"] = result.apply(  lambda x: f.get_LatestPrice(PriceChanges, fairValueDate, x["Quantity_Type"], fairValueCurrency, 0, 5), axis=1)
+    # Step 7: If fair value currency is provided, compute fair value
+    if fairValueCurrency:
+        f.log(f"Calculating fair value using currency {fairValueCurrency}.")
 
-        # We generate the Fair Value columns based on the Price
-        result["Change_FairValue"] =  result['Quantity'] * result['Price']
+        # Fetch the latest prices and calculate fair value
+        result["Price"] = result.apply(
+            lambda x: f.get_LatestPrice(price_changes, fairValueDate, x["Quantity_Type"], fairValueCurrency, 0, 5),
+            axis=1
+        )
+        result["Change_FairValue"] = result["Quantity"] * result["Price"]
 
-        # We generate the output
-        outputList = result[
-            [ "Account", "Quantity_Type", "Quantity",  "Price", "Change_FairValue"]].rename(
-            columns={
-                "Quantity": "Change"
-            })
-        outputList.round({'Change': 4})
-        outputList.round({'Change_FairValue': 4})
-        outputList.round({'Price': 4})
+        # Prepare output data with fair value columns
+        output_list = result[["Account", "Quantity_Type", "Quantity", "Price", "Change_FairValue"]].rename(
+            columns={"Quantity": "Change"})
 
-        #We determine if we want to group the types into a single one
+        # Round values to 4 decimal places for better readability
+        output_list = output_list.round({'Change': 4, 'Change_FairValue': 4, 'Price': 4})
+
+        # Step 8: Group types into a single one if required
         if groupTypes:
-            outputList = outputList[["Account", "Change_FairValue"]]
-            outputList = outputList.groupby(["Account"]).sum().reset_index()
+            f.log("Grouping types into a single one.")
+            output_list = output_list[["Account", "Change_FairValue"]].groupby("Account").sum().reset_index()
 
-
-    #If we don't want the fair value then we get just the balance
+    # Step 9: If no fair value is required, just return the balance
     else:
-        outputList = result[[ "Account", "Quantity_Type", "Quantity"]].rename(
-        columns={
-            "Quantity": "Change"
-        } )
-        # We remove the
-        outputList = outputList[~(outputList['Change'] == 0.0)]
-        outputList.round({'Change': 4})
+        f.log("No fair value currency provided, calculating raw balance.")
+        output_list = result[["Account", "Quantity_Type", "Quantity"]].rename(columns={"Quantity": "Change"})
 
+        # Remove rows with zero balances
+        output_list = output_list[output_list["Change"] != 0].round({'Change': 4})
 
-    # We write the output to a file
+    # Step 10: Write the output to a file
+    f.log(f"Writing the output to {output_path}.")
+    pandas.write_file_balance(output_list, output_path, separator)
 
-    pandas.write_file_balance(outputList,output,separator)
-
-
+    f.log("Balance calculation completed successfully.")
     pass
-
 
 
 def command_runningTotal(run, config):

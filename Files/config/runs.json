@@ -1,12 +1,15 @@
 {
   "Runs": [
 
-
-    	 {
-      "output": "Files/output/Validation_new.csv",
-      "input": "Files/output/output_merged.csv",
-      "task": "validate",
-	  "runId":"0"
+{
+      "output": "Files/output/output_2_benchmark_new.csv",
+	  "input": "Files/output/output_merged.csv",
+      "task": "benchmark",
+	  "benchmark": "Assets:Transfers:IBKR",
+      "benchmarkAccountId": "IBKR_",
+      "maxDepth": 5,
+	  "benchmarkTicker": "VWCE",
+	  "runId":"1"
     }
   ]
 }
