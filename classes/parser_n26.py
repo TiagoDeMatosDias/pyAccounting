@@ -22,7 +22,7 @@ def write_Entries(run, config):
     entries = import_Entries(config["Config_n26"])
 
     # Write the entries to the specified output file
-    pandas.write_file_entries(entries, output, config["CSV_Separator"])
+    pandas.write_file(entries, output, config["CSV_Separator"])
     functions.log(f"Entries successfully written to {output}.")
     pass
 

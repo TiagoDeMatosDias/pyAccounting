@@ -3,40 +3,103 @@ from decimal import Decimal
 import pandas as pd
 from classes.functions import Functions as f
 
-def read_file(filepath, separator) -> pd.DataFrame:
+
+def read_file(filepath: str, separator: str) -> pd.DataFrame:
+    """
+    Reads a CSV file into a DataFrame with optional date parsing and type conversion.
+
+    Parameters:
+    - filepath: The path to the CSV file.
+    - separator: The separator used in the CSV file (e.g., ',' or ';').
+
+    Returns:
+    - A pandas DataFrame containing the parsed file, or an empty DataFrame if an error occurs.
+    """
     try:
+        # Attempt to read the file with date parsing
         entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator, parse_dates=["Date"], date_format="%Y-%m-%d")
-    except:
+    except Exception as e:
+        f.log(f"Failed to parse dates from file {filepath}: {e}")
+
+        # Retry without date parsing if the first attempt fails
         try:
             entries = pd.read_csv(filepath_or_buffer=filepath, sep=separator)
-        except:
-            f.log("Failed to open " + filepath)
-            entries = pd.DataFrame()
+        except Exception as e:
+            f.log(f"Failed to read file {filepath}: {e}")
+            return pd.DataFrame()  # Return an empty DataFrame if both attempts fail
 
-
-    # Convert the "Quantity" and "Cost" columns to Decimal
+    # Check if the DataFrame is not empty
     if not entries.empty:
+        # Convert "Quantity" and "Cost" columns to Decimal if they exist
         for column in ["Quantity", "Cost"]:
             if column in entries.columns:
-                entries[column] = entries[column].apply(lambda x: Decimal(str(x)))
+                try:
+                    entries[column] = entries[column].apply(lambda x: Decimal(str(x)) if pd.notnull(x) else None)
+                except Exception as e:
+                    f.log(f"Failed to convert column {column} to Decimal in file {filepath}: {e}")
 
     return entries
 
-def write_file_entries(entries, output, separator):
-    outputfile = f.get_full_Path(output)
-    if entries.size == 0:
-        f.log("No entries to write to file")
-    else:
-        entries.to_csv(outputfile, sep=separator, index=False, mode="w", header=True,columns=["Date","Type","ID","Name","Account","Quantity","Quantity_Type","Cost","Cost_Type"])
-    pass
 
-def write_file_balance(entries, output, separator):
+def write_file(data, output, separator):
+    """
+    Writes a DataFrame to a CSV file with specified columns if they exist.
+
+    Parameters:
+    - data: The DataFrame to be written to the CSV file.
+    - output: The output file path for the CSV file.
+    - separator: The separator to use in the CSV file (e.g., ',' or ';').
+    """
+
+    # Get the full path for the output file
     outputfile = f.get_full_Path(output)
-    entries.to_csv(outputfile, sep=separator, index=False, mode="w", header=True)
-    pass
+    f.log(f"Output file path resolved: {outputfile}")
+
+    # Set of columns to check before writing
+    columns_to_check = {"Date", "Type", "ID", "Name", "Account", "Quantity", "Quantity_Type", "Cost", "Cost_Type"}
+
+    # Check if all the specified columns exist in the DataFrame
+    if columns_exist(data, columns_to_check):
+        # If columns exist, write the CSV with only these columns in the specified order
+        f.log(f"All required columns found. Writing file with specified columns: {columns_to_check}")
+        data.to_csv(outputfile, sep=separator, index=False, mode="w", header=True,
+                    columns=["Date", "Type", "ID", "Name", "Account", "Quantity", "Quantity_Type", "Cost", "Cost_Type"])
+    else:
+        # If columns don't exist, write the entire DataFrame as-is
+        f.log("Not all required columns are present. Writing entire DataFrame.")
+        data.to_csv(outputfile, sep=separator, index=False, mode="w", header=True)
+
+    f.log(f"File written successfully to: {outputfile}")
+
+
+def columns_exist(data, columns_to_check):
+    """
+    Checks if all columns in 'columns_to_check' exist in the DataFrame.
+
+    Parameters:
+    - data: The DataFrame in which to check for the columns.
+    - columns_to_check: A set of column names to check for in the DataFrame.
+
+    Returns:
+    - True if all columns exist, False otherwise.
+    """
+
+    # Log the columns being checked and the columns available in the DataFrame
+    f.log(f"Checking if the following columns exist: {columns_to_check}")
+    f.log(f"Available columns in the DataFrame: {set(data.columns)}")
+
+    # Check if the columns_to_check are a subset of the DataFrame's columns
+    if columns_to_check.issubset(data.columns):
+        f.log("All required columns exist.")
+        return True
+
+    # Log if some columns are missing
+    f.log("Some required columns are missing.")
+    return False
+
+
 
 def get_cumulativesum(entries):
-    #entries["RunningTotal"] = entries.groupby(by=["Account","Quantity_Type"])["Quantity"].cumsum(skipna=True)
     # Convert 'Quantity' to float for computation
     entries['Quantity_float'] = entries['Quantity'].apply(lambda x: float(x) if isinstance(x, Decimal) else x)
 

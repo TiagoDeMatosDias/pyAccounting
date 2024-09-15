@@ -62,7 +62,7 @@ def write_Entries(run, config):
         CSV_Separator = f.get_runParameter(config ,"CSV_Separator")
 
         import classes.pandas as pandas
-        pandas.write_file_entries(entries, output, CSV_Separator)
+        pandas.write_file(entries, output, CSV_Separator)
 
     except AttributeError:
         f.log(AttributeError.obj)

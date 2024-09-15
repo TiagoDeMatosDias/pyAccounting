@@ -13,7 +13,7 @@ def write_Entries(run, config):
     """
     output = functions.get_runParameter(run, "output")
     entries = import_Entries(config["Config_wise"])
-    pandas.write_file_entries(entries, output, config["CSV_Separator"])
+    pandas.write_file(entries, output, config["CSV_Separator"])
 
 def import_Entries(parserLocation):
     """

@@ -94,12 +94,12 @@ def command_merge(run, config):
 
     # Write the sorted DataFrame to the output file
     try:
-        pandas.write_file_entries(entries, output, separator)
+        pandas.write_file(entries, output, separator)
         f.log(f"Successfully wrote the merged data to {output}.")
     except Exception as e:
         f.log(f"Error writing merged data to {output}: {e}. Attempting to write balance data.")
         try:
-            pandas.write_file_balance(entries, output, separator)
+            pandas.write_file(entries, output, separator)
             f.log(f"Successfully wrote balance data to {output}.")
         except Exception as e:
             f.log(f"Error writing balance data to {output}: {e}")
@@ -143,12 +143,12 @@ def command_filter(run, config):
     # Attempt to write the filtered data to the output file
     try:
         f.log("Writing filtered data to output file.")
-        pandas.write_file_entries(data, output_path, separator)
+        pandas.write_file(data, output_path, separator)
     except Exception as e:
         f.log(f"Failed to write data using write_file_entries. Error: {e}")
         f.log("Attempting to write using write_file_balance.")
         try:
-            pandas.write_file_balance(data, output_path, separator)
+            pandas.write_file(data, output_path, separator)
         except Exception as e:
             f.log(f"Failed to write data using write_file_balance. Error: {e}")
             f.log("Unable to write filtered data to output file.")
@@ -212,7 +212,7 @@ def command_validate(run, config):
 
     # Write the validation results to the output file
     f.log("Writing validation results to output file.")
-    pandas.write_file_balance(results_df, output_path, separator)
+    pandas.write_file(results_df, output_path, separator)
 
     f.log("Transaction validation process completed.")
 
@@ -295,7 +295,7 @@ def command_benchmark(run, config):
 
     # Step 6: Write the updated entries to the output file
     f.log(f"Writing updated data to {output_path}.")
-    pandas.write_file_entries(entries, output_path, separator)
+    pandas.write_file(entries, output_path, separator)
 
     f.log("Benchmark processing completed successfully.")
     pass
@@ -402,7 +402,7 @@ def command_balance(run, config):
 
     # Step 10: Write the output to a file
     f.log(f"Writing the output to {output_path}.")
-    pandas.write_file_balance(output_list, output_path, separator)
+    pandas.write_file(output_list, output_path, separator)
 
     f.log("Balance calculation completed successfully.")
     pass
@@ -517,7 +517,7 @@ def command_runningTotal(run, config):
         ].rename(columns={"Quantity": "Change"})
 
     # Write the output to a file
-    pandas.write_file_balance(outputList, output_path, separator)
+    pandas.write_file(outputList, output_path, separator)
 
     # Log the completion
     f.log("Running total calculation completed and output written to file.")
@@ -667,5 +667,5 @@ def command_compress(run, config):
     output_Entries_reset["Name"] = "End of period compression"
 
     # Write the result to a file
-    pandas.write_file_entries(output_Entries_reset, output, separator)
+    pandas.write_file(output_Entries_reset, output, separator)
     f.log("Compression complete and data written to file.")
