@@ -30,7 +30,6 @@ def import_Entries(parserLocation):
     except:
         functions.log("Unable to sort values for Wise entries")
     return entries
-    return entries
 
 ## This function reads the IBKR XML file and returns a list of every XML object
 def get_entriesFromFile(inputFile, parser_config):

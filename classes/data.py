@@ -93,17 +93,7 @@ def command_merge(run, config):
     f.log("Sorted the DataFrame by 'Date' in ascending order.")
 
     # Write the sorted DataFrame to the output file
-    try:
-        pandas.write_file(entries, output, separator)
-        f.log(f"Successfully wrote the merged data to {output}.")
-    except Exception as e:
-        f.log(f"Error writing merged data to {output}: {e}. Attempting to write balance data.")
-        try:
-            pandas.write_file(entries, output, separator)
-            f.log(f"Successfully wrote balance data to {output}.")
-        except Exception as e:
-            f.log(f"Error writing balance data to {output}: {e}")
-
+    pandas.write_file(entries, output, separator)
     f.log("Merge process completed.")
 
 
@@ -141,18 +131,7 @@ def command_filter(run, config):
     data = f.run_filters(data, filters)
 
     # Attempt to write the filtered data to the output file
-    try:
-        f.log("Writing filtered data to output file.")
-        pandas.write_file(data, output_path, separator)
-    except Exception as e:
-        f.log(f"Failed to write data using write_file_entries. Error: {e}")
-        f.log("Attempting to write using write_file_balance.")
-        try:
-            pandas.write_file(data, output_path, separator)
-        except Exception as e:
-            f.log(f"Failed to write data using write_file_balance. Error: {e}")
-            f.log("Unable to write filtered data to output file.")
-
+    pandas.write_file(data, output_path, separator)
     f.log("Data filtering and writing process completed.")
 
 
