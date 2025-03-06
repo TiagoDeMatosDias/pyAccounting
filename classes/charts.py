@@ -37,8 +37,7 @@ def generate_stackedBarChart(data, Index_Name, Columns_Name, Values_Name, SaveLo
      data_pivot.plot(
           kind='bar',
           stacked=True,
-          ax=ax,
-          label='Inline label'
+          ax=ax
      )
 
      # Customize the plot

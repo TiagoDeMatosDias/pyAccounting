@@ -1,24 +1,24 @@
 {
   "Runs": [
 	 {
-      "output": "Files/output/output_parser_IBKR.csv",
+      "output": "Files/output/2024/output_parser_IBKR.csv",
       "task": "parser",
       "type": "IBKR",
 	  "runId":"0"
     },{
-      "output": "Files/output/output_parser_n26.csv",
+      "output": "Files/output/2024/output_parser_n26.csv",
       "task": "parser",
       "type": "n26",
 	  "runId":"0"
     },
     {
-      "output": "Files/output/output_parser_wise.csv",
+      "output": "Files/output/2024/output_parser_wise.csv",
       "task": "parser",
       "type": "wise",
 	  "runId":"0"
     },
     {
-     "output": "Files/output/output_parser_yFinance.csv",
+     "output": "Files/output/2024/output_parser_yFinance.csv",
       "task": "parser",
       "type": "yFinance",
       "interval": "1wk",
@@ -85,6 +85,10 @@
           "yTicker": "SXR8.DE"
         },
         {
+          "Ticker": "CSPX",
+          "yTicker": "CSPX.AS"
+        },
+        {
           "Ticker": "JXN"
         },
         {
@@ -98,20 +102,29 @@
       ]
     },
     {
-      "output": "Files/output/output_merged.csv",
+      "output": "Files/output/2024/output_merged.csv",
       "inputs": [
         {"input": "Files/input/Adjustments.csv"},
-        {"input": "Files/output/output_parser_n26.csv"},
-        {"input": "Files/output/output_parser_IBKR.csv"},
-        {"input": "Files/output/output_parser_wise.csv"},
-        {"input": "Files/output/output_parser_yFinance.csv"}
+        {"input": "Files/output/2024/output_parser_n26.csv"},
+        {"input": "Files/output/2024/output_parser_IBKR.csv"},
+        {"input": "Files/output/2024/output_parser_wise.csv"},
+        {"input": "Files/output/2024/output_parser_yFinance.csv"}
       ],
       "task": "merge",
 	  "runId":"1"
     },
     {
-      "output": "Files/output/output_2_benchmark.csv",
-	  "input": "Files/output/output_merged.csv",
+      "output": "Files/output/2024/ShadeResearch_Data.csv",
+      "inputs": [
+        {"input": "Files/output/2024/output_parser_IBKR.csv"},
+        {"input": "Files/output/2024/output_parser_yFinance.csv"}
+      ],
+      "task": "merge",
+	  "runId":"1"
+    },
+    {
+      "output": "Files/output/2024/ShadeResearch_benchmark.csv",
+	  "input": "Files/output/2024/ShadeResearch_Data.csv",
       "task": "benchmark",
 	  "benchmark": "Assets:Transfers:IBKR",
       "benchmarkAccountId": "IBKR_",
@@ -120,8 +133,8 @@
 	  "runId":"1"
     },
     {
-      "output": "Files/output/output_InvestmentvsBenchmark_wk_noGroup.csv",
-      "input": "Files/output/output_2_benchmark.csv",
+      "output": "Files/output/2024/ShadeResearch_InvestmentvsBenchmark_wk_noGroup.csv",
+      "input": "Files/output/2024/ShadeResearch_benchmark.csv",
       "task": "runningTotal",
       "increment": "W",
       "fairValueCurrency": "EUR",
@@ -129,8 +142,26 @@
 	  "runId":"5"
     },
     {
-      "output": "Files/output/output_InvestmentvsBenchmark_wk.csv",
-      "input": "Files/output/output_2_benchmark.csv",
+      "output": "Files/output/2024/ShadeResearch_InvestmentvsBenchmark_Q_noGroup.csv",
+      "input": "Files/output/2024/ShadeResearch_benchmark.csv",
+      "task": "runningTotal",
+      "increment": "Q",
+      "fairValueCurrency": "EUR",
+      "groupTypes": false,
+	  "runId":"5"
+    },
+    {
+      "output": "Files/output/2024/ShadeResearch_InvestmentvsBenchmark_Y_noGroup.csv",
+      "input": "Files/output/2024/ShadeResearch_benchmark.csv",
+      "task": "runningTotal",
+      "increment": "Y",
+      "fairValueCurrency": "EUR",
+      "groupTypes": false,
+	  "runId":"5"
+    },
+    {
+      "output": "Files/output/2024/ShadeResearch_InvestmentvsBenchmark_wk_Group.csv",
+      "input": "Files/output/2024/ShadeResearch_benchmark.csv",
       "task": "runningTotal",
       "increment": "W",
       "fairValueCurrency": "EUR",
@@ -138,8 +169,8 @@
 	  "runId":"5"
     },
     {
-      "output": "Files/output/Weekly_Balances.csv",
-      "input": "Files/output/output_InvestmentvsBenchmark_wk.csv",
+      "output": "Files/output/2024/ShadeResearch_wk_Group_Balances.csv",
+      "input": "Files/output/2024/ShadeResearch_InvestmentvsBenchmark_wk_Group.csv",
       "task": "filter",
       "filters": [
         {
@@ -149,62 +180,6 @@
         }
       ],
 	  "runId":"3"
-    },
-    {
-      "output": "Files/output/Weekly_Balances_assets.csv",
-      "input": "Files/output/Weekly_Balances.csv",
-      "task": "filter",
-      "filters": [
-        {
-          "type": "Contains",
-          "column": "Account",
-          "value": "Assets:Investment:U7678484:Equity"
-        }
-      ],
-	  "runId":"3"
-    },
-    {
-      "output": "Files/output/Weekly_Balances_Benchmark.csv",
-      "input": "Files/output/Weekly_Balances.csv",
-      "task": "filter",
-      "filters": [
-        {
-          "type": "Contains",
-          "column": "Account",
-          "value": "Benchmark"
-        }
-      ],
-	  "runId":"3"
-    },
-    {
-      "output": "Files/output/Weekly_Balances.csv",
-      "inputs": [
-        {"input": "Files/output/Weekly_Balances_assets.csv"},
-        {"input": "Files/output/Weekly_Balances_Benchmark.csv"}
-      ],
-      "task": "merge",
-	  "runId":"1"
-    },
-    {
-      "input": "Files/output/Weekly_Balances.csv",
-      "task": "chart",
-      "type": "lineChart",
-      "output": "Files/output/chart_14.png",
-      "index_Name":"Date",
-      "column_Name":"Account",
-      "value_Name":"RunningTotal_FairValue",
-      "colormap": "tab10",
-      "title": "Portfolio versus Benchmark on a Weekly Basis",
-      "max_legend_entries": 10,
-      "invert": false,
-	  "runId":"0"
-    },
-    {
-      "output": "Files/output/output_compressed.csv",
-      "input": "Files/output/output_merged.csv",
-      "task": "compress",
-      "type": "IBKR",
-	  "runId":"0"
     }
   ]
 }
